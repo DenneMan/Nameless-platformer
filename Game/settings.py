@@ -1,0 +1,11 @@
+import pygame
+
+SCREEN_W, SCREEN_H = 1900, 1000
+
+GRAVITY = -1900
+
+COLLISION_MARGIN = 1
+
+LEFT = 0
+STOP = 1
+RIGHT = 2
