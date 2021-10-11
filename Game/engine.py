@@ -2,17 +2,51 @@ import pygame
 from settings import *
 pygame.font.init()
 
+class System():
+    def __init__(self):
+        pass
+    def check(self, entity):
+        return True
+    def update(self, surface, entities, colliders):
+        for entity in entities:
+            if self.check(entity):
+                self._update(surface, entity, entities, colliders)
+    def _update(self, surface, entity, entities, colliders):
+        pass
+
+class CameraSystem(System):
+    def __init__(self):
+        super().__init__()
+    def check(self, entity):
+        return entity.camera is not None
+    def _update(self, surface, entity, entities, colliders):
+        
+        surface.set_clip(entity.camera.get_rect())
+        surface.fill((28, 28, 28))
+
+        # Draw platforms
+        for collider in colliders:
+            pygame.draw.rect(surface, (255, 255, 255), collider)
+        # Draw entities
+        for entity in entities:
+            if entity.controller == None:
+                entity.animations.animations_list[entity.state].draw(surface, entity.transform.pos, entity.transform.size, False, False)
+            else:
+                entity.state = entity.controller.get_state()
+                entity.animations.animations_list[entity.state].draw(surface, entity.transform.pos, entity.transform.size, entity.controller.get_flipped(), False)
+
+        surface.set_clip(None)
+
 ################
 #  Components  #
 ################
 
 class Transform():
     def __init__(self, x, y, width, height):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+        self.pos = pygame.math.Vector2(x, y)
+        self.size = pygame.math.Vector2(width, height)
+    def get_rect(self):
+        return pygame.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
 
 class Animations():
     def __init__(self):
@@ -20,6 +54,12 @@ class Animations():
     def add(self, state, animation):
         self.animations_list[state] = animation
 
+class Camera():
+    def __init__(self, x, y, width, height):
+        self.pos = pygame.math.Vector2(x, y)
+        self.size = pygame.math.Vector2(width, height)
+    def get_rect(self):
+        return pygame.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
 
 # Class to handle animations
 class Animation():
@@ -58,10 +98,10 @@ class Animation():
         self.animations_per_second = animations_per_second
 
 
-    def draw(self, surface, position, size, flip_x, flip_y):
-        scaled_image = pygame.transform.scale(self.images[self.image_index], size)
+    def draw(self, surface, pos, size, flip_x, flip_y):
+        scaled_image = pygame.transform.scale(self.images[self.image_index], (int(size.x), int(size.y)))
         flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
-        surface.blit(flipped_image, position)
+        surface.blit(flipped_image, (int(pos.x), int(pos.y)))
 
 
 ###############
@@ -151,3 +191,4 @@ class Entity():
         self.transform = None
         self.animations = Animations()
         self.controller = None
+        self.camera = None

@@ -6,20 +6,19 @@ from settings import *
 #################################################
 class Player():
 
-    def __init__(self, animations):
+    def __init__(self, transform):
+        self.transform = transform
         self.state = 'idle'
 
-        self.animations = animations
+        self.rect = pygame.Rect(self.transform.pos.x, self.transform.pos.y, self.transform.size.x, self.transform.size.y)
 
-        self.rect = pygame.transform.scale(self.animations.animations_list['idle'].images[0], (64, 64)).get_rect()
-
-        self.pos = pygame.math.Vector2(SCREEN_W / 2, SCREEN_H / 3)
         self.vel = pygame.math.Vector2(0, 0)
 
         self.acceleration = 1000
         self.friction = 6.4
         self.max_speed = 350
         self.terminal_velocity = 1500
+        self.direction = STOP
 
         self.is_grounded = False
         self.is_jumping = False
@@ -38,8 +37,7 @@ class Player():
 
         self.unstoppable_animation = False
 
-    def update(self, dt, direction, colliders, center_text):
-        self.direction = direction
+    def update(self, dt, colliders):
 
         # TODO fix unstoppable_animation
         # First part of checking if last frame, player was in air and the next frame on ground, then playing a landing animation
@@ -48,14 +46,14 @@ class Player():
         #else:
         #    before_update_grounded = False
 
-        self.horizontal_movement(dt, direction)
-        self.rect.x = self.pos.x + self.vel.x * dt
+        self.horizontal_movement(dt)
+        self.rect.x = self.transform.pos.x + self.vel.x * dt
         self.horizontal_collision(colliders)
-        self.rect.x = self.pos.x
+        self.rect.x = self.transform.pos.x
         self.vertical_movement(dt)
-        self.rect.y = self.pos.y + self.vel.y * dt
+        self.rect.y = self.transform.pos.y + self.vel.y * dt
         self.vertical_collision(colliders)
-        self.rect.y = self.pos.y
+        self.rect.y = self.transform.pos.y
 
         # Second part of last comment
         #if self.is_grounded and before_update_grounded == False:
@@ -64,26 +62,26 @@ class Player():
         #    print(self.animations.animations_list[self.state].image_index)
         #    self.unstoppable_animation = True
 
-        self.pos += self.vel * dt
+        self.transform.pos += self.vel * dt
 
         self.handle_out_of_bounds()
 
 
-    def horizontal_movement(self, dt, direction):
+    def horizontal_movement(self, dt):
         self.dash_timer -= dt
 
-        if direction == LEFT:
+        if self.direction == LEFT:
             self.vel.x -= self.acceleration * dt
-        if direction == RIGHT:
+        if self.direction == RIGHT:
             self.vel.x += self.acceleration * dt
         if self.is_dashing and self.dash_timer < 0:
-            self.dash(direction)
+            self.dash(self.direction)
         self.is_dashing = False
         # Slow the player down if speed is over max speed
         if self.vel.x > self.max_speed or self.vel.x < -self.max_speed:
             self.vel.x *= 1 - dt * 5
 
-        if (self.vel.x > 0 and direction == LEFT) or (self.vel.x < 0 and direction == RIGHT) or direction == STOP:
+        if (self.vel.x > 0 and self.direction == LEFT) or (self.vel.x < 0 and self.direction == RIGHT) or self.direction == STOP:
             if self.is_grounded:
                 self.vel.x -= self.vel.x * self.friction * dt
 
@@ -119,30 +117,24 @@ class Player():
             if self.rect.right > collider.left and self.rect.left < collider.right:
                 if self.rect.bottom >= collider.top and self.rect.top <= collider.bottom:
                     self.vel.y = 0
-                    if self.pos.y < collider.top:
+                    if self.transform.pos.y < collider.top:
                         self.is_grounded = True
 
 
     def handle_out_of_bounds(self):
         # Handle out of bounds on x axis
         if self.rect.left > SCREEN_W:
-            self.pos.x = 0 + self.rect.width
+            self.transform.pos.x = 0 + self.transform.size.x
         if self.rect.right < 0:
-            self.pos.x = SCREEN_W
+            self.transform.pos.x = SCREEN_W
         # Handle out of bounds on y axis
         if self.rect.top > SCREEN_H:
-            self.pos.y = 0 - self.rect.height
+            self.transform.pos.y = 0 - self.transform.size.y
         
         if self.rect.bottom < 0:
-            self.pos.y = SCREEN_H
-    
+            self.transform.pos.y = SCREEN_H
 
-    def draw(self, surface, dt):
-        if self.direction == RIGHT:
-            self.flip_image = False
-        elif self.direction == LEFT:
-            self.flip_image = True
-        # Animation logic
+    def get_state(self):
         if self.is_grounded:
             if -50 < self.vel.x < 50:
                 self.state = 'idle'
@@ -155,27 +147,11 @@ class Player():
                 self.state = 'apex'
             elif self.vel.y > 0:
                 self.state = 'fall'
-        self.animation = self.animations.animations_list[self.state]
-        self.animation.update(dt)
-        self.animation.draw(surface, self.pos, (64, 64), self.flip_image, False)
-
-    def state0(self):
-        self.animation.set_start_index(0)
-        self.animation.set_end_index(2)
-        self.animation.set_animations_per_second(3)
-    def state1(self):
-        self.animation.set_start_index(8)
-        self.animation.set_end_index(15)
-        self.animation.set_animations_per_second(8)
-    def state2(self):
-        self.animation.set_start_index(9)
-        self.animation.set_end_index(9)
-        self.animation.set_animations_per_second(1)
-    def state3(self):
-        self.animation.set_start_index(8)
-        self.animation.set_end_index(8)
-        self.animation.set_animations_per_second(1)
-    def state4(self):
-        self.animation.set_start_index(10)
-        self.animation.set_end_index(10)
-        self.animation.set_animations_per_second(1)
+        return self.state
+    
+    def get_flipped(self):
+        if self.direction == RIGHT:
+            self.flip_image = False
+        elif self.direction == LEFT:
+            self.flip_image = True
+        return self.flip_image
