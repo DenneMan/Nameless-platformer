@@ -2,9 +2,73 @@ import pygame
 from settings import *
 pygame.font.init()
 
-#######################################################
-#  Loads images from spritesheet to a list of images  #
-#######################################################
+################
+#  Components  #
+################
+
+class Transform():
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+class Animations():
+    def __init__(self):
+        self.animations_list = {}
+    def add(self, state, animation):
+        self.animations_list[state] = animation
+
+
+# Class to handle animations
+class Animation():
+
+    def __init__(self, images, animations_per_second):
+        self.images = images
+        self.image_index = 0
+        self.animation_timer = 0
+        self.animations_per_second = animations_per_second
+        self.has_looped = False
+
+
+    def update(self, dt):
+        # Increment animation_timer by the time between frames
+        self.animation_timer += dt
+
+        if self.animation_timer >= 1 / self.animations_per_second:
+            self.image_index += 1
+            self.animation_timer = 0
+            self.has_looped = False
+            if self.image_index >= len(self.images):
+                # Reset frame when it reaches the end
+                self.image_index = 0
+                self.has_looped = True
+
+    
+    def get_looped(self):
+        return self.has_looped
+
+
+    def set_index(self, index):
+        self.image_index = index
+
+    
+    def set_animations_per_second(self, animations_per_second):
+        self.animations_per_second = animations_per_second
+
+
+    def draw(self, surface, position, size, flip_x, flip_y):
+        scaled_image = pygame.transform.scale(self.images[self.image_index], size)
+        flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
+        surface.blit(flipped_image, position)
+
+
+###############
+#  Functions  #
+###############
+
+# Loads images from spritesheet to a list of images
 def load_spritesheet(filename, sprite_size):
     spritesheet = pygame.image.load(filename)
     spritesheet_rect = spritesheet.get_rect()
@@ -22,9 +86,12 @@ def load_spritesheet(filename, sprite_size):
     
     return sprites
 
-##################################################################################
-#  Sophisticated text creator that has way more features than basic pygame text  #
-##################################################################################
+
+##################
+#  Object types  #
+##################
+
+# Sophisticated text creator that has way more features than basic pygame text
 class Text(pygame.sprite.Sprite):
 
     def __init__(self, font, text, color, position, anchor):
@@ -73,65 +140,14 @@ class Text(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect(**{self.anchor: self._position})
 
-################################
-#  Class to handle animations  #
-################################
-class Animation():
+class Camera():
+    def __init__(self, x, y, width, height):
+        self.rect = pygame.Rect(x, y, width, height)
 
-    def __init__(self, images, animations_per_second, start_index, end_index):
-        self.images = images
-        self.image_index = start_index
-        self.animation_timer = 0
-        self.animations_per_second = animations_per_second
-        self.start_index = start_index
-        self.end_index = end_index
-        
-        self.animation_playing = False
-
-
-    def update(self, dt):
-        # Increment animation_timer by the time between frames
-        self.animation_timer += dt
-
-        if self.animation_timer >= 1 / self.animations_per_second:
-            self.image_index += 1
-            self.animation_timer = 0
-            if self.image_index > self.end_index:
-                # Reset frame when it reaches the end
-                self.image_index = self.start_index
-
-                # End unstoppable animation when it ends
-                if self.animation_playing == True:
-                    self.animation_playing = False
-
-
-    def set_start_index(self, index):
-        if not self.animation_playing:
-            if self.start_index != index:
-                self.image_index = index
-            self.start_index = index
-
-
-    def set_end_index(self, index):
-        if not self.animation_playing:
-            if self.end_index != index:
-                self.image_index = self.start_index
-            self.end_index = index
-
-    
-    def set_animations_per_second(self, animations_per_second):
-        if not self.animation_playing:
-            self.animations_per_second = animations_per_second
-
-    
-    def do_unstoppable_animation(self, start_index, end_index, animations_per_second):
-        if not self.animation_playing:
-            self.animation_playing = True
-            self.image_index = start_index
-            self.start_index = start_index
-            self.end_index = end_index
-            self.animations_per_second = animations_per_second
-
-
-    def draw(self, surface, position, size, flip):
-        surface.blit(pygame.transform.scale(pygame.transform.flip(self.images[self.image_index], flip, False), size), position)
+class Entity():
+    def __init__(self):
+        self.state = 'idle'
+        self.type = 'normal'
+        self.transform = None
+        self.animations = Animations()
+        self.controller = None

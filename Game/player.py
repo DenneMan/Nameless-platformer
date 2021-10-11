@@ -6,10 +6,12 @@ from settings import *
 #################################################
 class Player():
 
-    def __init__(self, animation):
-        self.animation = animation
+    def __init__(self, animations):
+        self.state = 'idle'
 
-        self.rect = pygame.transform.scale(self.animation.images[0], (64, 64)).get_rect()
+        self.animations = animations
+
+        self.rect = pygame.transform.scale(self.animations.animations_list['idle'].images[0], (64, 64)).get_rect()
 
         self.pos = pygame.math.Vector2(SCREEN_W / 2, SCREEN_H / 3)
         self.vel = pygame.math.Vector2(0, 0)
@@ -34,15 +36,17 @@ class Player():
 
         self.flip_image = False
 
+        self.unstoppable_animation = False
 
     def update(self, dt, direction, colliders, center_text):
         self.direction = direction
 
+        # TODO fix unstoppable_animation
         # First part of checking if last frame, player was in air and the next frame on ground, then playing a landing animation
-        if self.is_grounded:
-            before_update_grounded = True
-        else:
-            before_update_grounded = False
+        #if self.is_grounded:
+        #    before_update_grounded = True
+        #else:
+        #    before_update_grounded = False
 
         self.horizontal_movement(dt, direction)
         self.rect.x = self.pos.x + self.vel.x * dt
@@ -53,9 +57,12 @@ class Player():
         self.vertical_collision(colliders)
         self.rect.y = self.pos.y
 
-        # Second part of ^^
-        if self.is_grounded and before_update_grounded == False:
-            self.animation.do_unstoppable_animation(3, 7, 16)
+        # Second part of last comment
+        #if self.is_grounded and before_update_grounded == False:
+        #    self.state = 'land'
+        #    #self.animations.animations_list[self.state].set_index(0)
+        #    print(self.animations.animations_list[self.state].image_index)
+        #    self.unstoppable_animation = True
 
         self.pos += self.vel * dt
 
@@ -83,10 +90,8 @@ class Player():
     def dash(self, direction):
         if direction == LEFT:
             self.vel.x = -self.dash_force
-            print("dash left")
         if direction == RIGHT:
             self.vel.x = self.dash_force
-            print("dash right")
         self.dash_timer = self.dash_delay
 
     def horizontal_collision(self, colliders):
@@ -140,25 +145,37 @@ class Player():
         # Animation logic
         if self.is_grounded:
             if -50 < self.vel.x < 50:
-                self.animation.set_start_index(0)
-                self.animation.set_end_index(2)
-                self.animation.set_animations_per_second(3)
+                self.state = 'idle'
             else:
-                self.animation.set_start_index(8)
-                self.animation.set_end_index(15)
-                self.animation.set_animations_per_second(8)
+                self.state = 'running'
         else:
             if -200 < self.vel.y < 200:
-                self.animation.set_start_index(9)
-                self.animation.set_end_index(9)
-                self.animation.set_animations_per_second(1)
+                self.state = 'jump'
             elif self.vel.y < 0:
-                self.animation.set_start_index(8)
-                self.animation.set_end_index(8)
-                self.animation.set_animations_per_second(1)
+                self.state = 'apex'
             elif self.vel.y > 0:
-                self.animation.set_start_index(10)
-                self.animation.set_end_index(10)
-                self.animation.set_animations_per_second(1)
+                self.state = 'fall'
+        self.animation = self.animations.animations_list[self.state]
         self.animation.update(dt)
-        self.animation.draw(surface, self.pos, (64, 64), self.flip_image)
+        self.animation.draw(surface, self.pos, (64, 64), self.flip_image, False)
+
+    def state0(self):
+        self.animation.set_start_index(0)
+        self.animation.set_end_index(2)
+        self.animation.set_animations_per_second(3)
+    def state1(self):
+        self.animation.set_start_index(8)
+        self.animation.set_end_index(15)
+        self.animation.set_animations_per_second(8)
+    def state2(self):
+        self.animation.set_start_index(9)
+        self.animation.set_end_index(9)
+        self.animation.set_animations_per_second(1)
+    def state3(self):
+        self.animation.set_start_index(8)
+        self.animation.set_end_index(8)
+        self.animation.set_animations_per_second(1)
+    def state4(self):
+        self.animation.set_start_index(10)
+        self.animation.set_end_index(10)
+        self.animation.set_animations_per_second(1)
