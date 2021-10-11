@@ -12,17 +12,18 @@ canvas = pygame.Surface((SCREEN_W, SCREEN_H))
 display = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 
 player_images = engine.load_spritesheet('assets/character/spritesheet.png', 16)
-#player_animation = engine.Animation(player_images, 3, 0, 2) # IDLE
-player_animation = engine.Animation(player_images, 8, 8, 15) # RUNNING
+player_animation = engine.Animation(player_images, 3, 0, 2) # IDLE
 
-center_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 256), '', (245, 217, 76), (SCREEN_W / 2, SCREEN_H / 2), 'center', 16)
+center_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 256), '', (245, 217, 76), (SCREEN_W / 2, SCREEN_H / 2), 'center')
 
-pygame.display.set_caption('TASformer')
+pygame.display.set_caption('Platformer')
 
 colliders = []
 colliders.append(pygame.Rect(SCREEN_W / 2 - 512 / 2, SCREEN_H / 2 + 32, 512, 64))
 colliders.append(pygame.Rect(SCREEN_W / 2 + 512 / 2, SCREEN_H / 2 - 32, 64, 64))
 colliders.append(pygame.Rect(SCREEN_W / 2 - 512 / 2 - 64, SCREEN_H / 2 - 32, 64, 64))
+
+colliders.append(pygame.Rect(SCREEN_W / 2 - 512 / 2, SCREEN_H / 5, 512, 64))
 
 player = Player(player_animation)
 direction = STOP
@@ -62,6 +63,8 @@ while True:
         direction = RIGHT
     else:
         direction = STOP
+    if active_keys[pygame.K_LSHIFT]:
+        player.is_dashing = True
 
     # Update entities
     player.update(dt, direction, colliders, center_text)
