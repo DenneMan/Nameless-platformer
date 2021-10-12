@@ -1,4 +1,4 @@
-import pygame, sys, time
+import pygame, sys
 import engine
 from player import Player
 from settings import *
@@ -27,13 +27,11 @@ colliders.append(pygame.Rect(SCREEN_W / 2 - 512 / 2, SCREEN_H / 5, 512, 64))
 
 direction = STOP
 
-last_frame_time = time.time()
-
 # Cleanup crew:
 
 player = engine.Entity()
 player.transform = engine.Transform(SCREEN_W / 2, SCREEN_H / 3, 64, 64)
-player.animations.add('idle', engine.Animation(player_images[0:3], 3))
+player.animations.add('idle', engine.Animation(player_images[0:3], 2))
 player.animations.add('running', engine.Animation(player_images[8:16], 8))
 player.animations.add('jump', engine.Animation(player_images[8:9], 1))
 player.animations.add('apex', engine.Animation(player_images[9:10], 1))
@@ -47,9 +45,13 @@ coin = engine.Entity()
 coin.transform = engine.Transform(300, 300, 32, 32)
 coin.animations.add('idle', engine.Animation(coin_images, 14))
 coin.type = 'collectable'
+#coin.camera = engine.Camera(250, 250, 132, 132)
+#coin.camera.set_world_pos(coin.transform.pos.x, coin.transform.pos.y)
 
 camera_sys = engine.CameraSystem()
-player.camera = engine.Transform(20, 20, SCREEN_W - 40, SCREEN_H - 40)
+player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
+player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
+player.camera.track_entity(player)
 
 entities = []
 entities.append(coin)
@@ -57,25 +59,27 @@ entities.append(player)
 
 # Delta time (time between frames) function, used for equations that contain time (ex. Distance = Speed * Time)
 # This is used to create frame rate independancy, I.e nomatter how low or how high the fps is, movement is the same
-def getDeltaTime():
-    global last_frame_time
-    this_frame_time = time.time()
-    delta_time = this_frame_time - last_frame_time
-    last_frame_time = this_frame_time
-    return delta_time
 
 ####################
 #  Main game loop  #
 ####################
 while True:
     # Get delta time
-    dt = getDeltaTime()
+    dt = engine.deltaTime()
     
     # Get Input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 4: 
+                player.camera.zoom -= dt * 6
+                player.camera.zoom = max(player.camera.zoom, 0.1)
+            if event.button == 5: 
+                player.camera.zoom += dt * 6
+                player.camera.zoom = min(player.camera.zoom, 2)
+    print(player.camera.zoom)
     active_keys = pygame.key.get_pressed()
     if active_keys[pygame.K_ESCAPE]:
         pygame.quit()
@@ -90,8 +94,13 @@ while True:
         player.controller.direction = STOP
     if active_keys[pygame.K_LSHIFT]:
         player.controller.is_dashing = True
+    
+    active_buttons = pygame.mouse.get_pressed()
+    if active_buttons[1]:
+        ...
 
     # Update entities
+
     for entity in entities:
         entity.animations.animations_list[entity.state].update(dt)
 

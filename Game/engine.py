@@ -1,4 +1,4 @@
-import pygame
+import pygame, time
 from settings import *
 pygame.font.init()
 
@@ -24,16 +24,22 @@ class CameraSystem(System):
         surface.set_clip(entity.camera.get_rect())
         surface.fill((28, 28, 28))
 
+        if entity.camera.tracked_entity != None:
+            entity.camera.world_x += ((entity.camera.tracked_entity.transform.pos.x + entity.camera.tracked_entity.transform.size.x / 2 - entity.camera.world_x) / 200) / entity.camera.zoom
+            entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / 200) / entity.camera.zoom
+
+        offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
+
         # Draw platforms
         for collider in colliders:
-            pygame.draw.rect(surface, (255, 255, 255), collider)
+            pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(collider.x / entity.camera.zoom + offset.x, collider.y / entity.camera.zoom + offset.y, collider.width / entity.camera.zoom, collider.height / entity.camera.zoom))
         # Draw entities
-        for entity in entities:
-            if entity.controller == None:
-                entity.animations.animations_list[entity.state].draw(surface, entity.transform.pos, entity.transform.size, False, False)
+        for e in entities:
+            if e.controller == None:
+                e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, False, False)
             else:
-                entity.state = entity.controller.get_state()
-                entity.animations.animations_list[entity.state].draw(surface, entity.transform.pos, entity.transform.size, entity.controller.get_flipped(), False)
+                e.state = e.controller.get_state()
+                e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.controller.get_flipped(), False)
 
         surface.set_clip(None)
 
@@ -48,18 +54,28 @@ class Transform():
     def get_rect(self):
         return pygame.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
 
+class Camera():
+    def __init__(self, x, y, width, height):
+        self.pos = pygame.math.Vector2(x, y)
+        self.size = pygame.math.Vector2(width, height)
+        self.world_x = 0
+        self.world_y = 0
+        self.tracked_entity = None
+        self.zoom = 1
+    def get_rect(self):
+        return pygame.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
+    def set_world_pos(self, x, y):
+        self.world_x = x
+        self.world_y = y
+    def track_entity(self, entity):
+        self.tracked_entity = entity
+    #def lerp_entity(self, entity):
+
 class Animations():
     def __init__(self):
         self.animations_list = {}
     def add(self, state, animation):
         self.animations_list[state] = animation
-
-class Camera():
-    def __init__(self, x, y, width, height):
-        self.pos = pygame.math.Vector2(x, y)
-        self.size = pygame.math.Vector2(width, height)
-    def get_rect(self):
-        return pygame.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
 
 # Class to handle animations
 class Animation():
@@ -126,6 +142,13 @@ def load_spritesheet(filename, sprite_size):
     
     return sprites
 
+last_frame_time = time.time()
+def deltaTime():
+    global last_frame_time
+    this_frame_time = time.time()
+    delta_time = this_frame_time - last_frame_time
+    last_frame_time = this_frame_time
+    return delta_time
 
 ##################
 #  Object types  #
@@ -179,10 +202,6 @@ class Text(pygame.sprite.Sprite):
             self.anchor = anchor
 
         self.rect = self.image.get_rect(**{self.anchor: self._position})
-
-class Camera():
-    def __init__(self, x, y, width, height):
-        self.rect = pygame.Rect(x, y, width, height)
 
 class Entity():
     def __init__(self):
