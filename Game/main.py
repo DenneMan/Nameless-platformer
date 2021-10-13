@@ -16,17 +16,17 @@ pygame.display.set_caption('Platformer')
 #center_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 256), '', (245, 217, 76), (SCREEN_W / 2, SCREEN_H / 2), 'center')
 
 
-colliders = []
-colliders.append(pygame.Rect(SCREEN_W / 2 - 512 / 2, SCREEN_H / 2 + 32, 512, 64))
-colliders.append(pygame.Rect(SCREEN_W / 2 + 512 / 2, SCREEN_H / 2 - 32, 64, 64))
-colliders.append(pygame.Rect(SCREEN_W / 2 - 512 / 2 - 64, SCREEN_H / 2 - 32, 64, 64))
-
-colliders.append(pygame.Rect(SCREEN_W / 2 - 512 / 2, SCREEN_H / 5, 512, 64))
-
+_colliders = []
+_colliders.append(pygame.Rect(2, 7, 12, 1))
+#_colliders.append(pygame.Rect())
+#_colliders.append(pygame.Rect())
+#_colliders.append(pygame.Rect())
 
 direction = STOP
 
-# Cleanup crew:
+colliders = []
+for collider in _colliders:
+    colliders.append(pygame.Rect(collider[0] * TILE_SIZE, collider[1] * TILE_SIZE, collider[2] * TILE_SIZE, collider[3] * TILE_SIZE))
 
 
 #coin = helper.instantiate('coin', 300, 300, False)
