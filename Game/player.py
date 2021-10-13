@@ -1,4 +1,6 @@
 import pygame
+import engine
+import helper
 from settings import *
 
 #################################################
@@ -37,14 +39,18 @@ class Player():
 
         self.unstoppable_animation = False
 
-    def update(self, dt, colliders):
+        self.grounded_list = []
 
-        # TODO fix unstoppable_animation
-        # First part of checking if last frame, player was in air and the next frame on ground, then playing a landing animation
-        #if self.is_grounded:
-        #    before_update_grounded = True
-        #else:
-        #    before_update_grounded = False
+    def update(self, dt, colliders):
+        if self.direction == RIGHT:
+            self.transform.mirrored = False
+        elif self.direction == LEFT:
+            self.transform.mirrored = True
+
+        if self.is_grounded:
+            last_grounded = True
+        else:
+            last_grounded = False
 
         self.horizontal_movement(dt)
         self.rect.x = self.transform.pos.x + self.vel.x * dt
@@ -55,12 +61,8 @@ class Player():
         self.vertical_collision(colliders)
         self.rect.y = self.transform.pos.y
 
-        # Second part of last comment
-        #if self.is_grounded and before_update_grounded == False:
-        #    self.state = 'land'
-        #    #self.animations.animations_list[self.state].set_index(0)
-        #    print(self.animations.animations_list[self.state].image_index)
-        #    self.unstoppable_animation = True
+        if last_grounded == False and self.is_grounded == True:
+            engine.entities.append(helper.instantiate('dust_landing', self.rect.center[0], self.rect.bottom, False))
 
         self.transform.pos += self.vel * dt
 
@@ -88,8 +90,10 @@ class Player():
     def dash(self, direction):
         if direction == LEFT:
             self.vel.x = -self.dash_force
+            engine.entities.append(helper.instantiate('dash', self.rect.left, self.rect.bottom, True))
         if direction == RIGHT:
             self.vel.x = self.dash_force
+            engine.entities.append(helper.instantiate('dash', self.rect.right, self.rect.bottom, False))
         self.dash_timer = self.dash_delay
 
     def horizontal_collision(self, colliders):
@@ -120,6 +124,9 @@ class Player():
                     if self.transform.pos.y < collider.top:
                         self.is_grounded = True
 
+                        # fix wierd bug caused by gravity being constant
+                        self.transform.pos.y = collider.top - self.transform.size.y
+
 
     def handle_out_of_bounds(self):
         # Handle out of bounds on x axis
@@ -148,10 +155,3 @@ class Player():
             elif self.vel.y > 0:
                 self.state = 'fall'
         return self.state
-    
-    def get_flipped(self):
-        if self.direction == RIGHT:
-            self.flip_image = False
-        elif self.direction == LEFT:
-            self.flip_image = True
-        return self.flip_image

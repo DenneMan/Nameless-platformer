@@ -1,6 +1,6 @@
-import pygame, sys
+import pygame, sys, random
 import engine
-from player import Player
+import helper
 from settings import *
 
 #######################################
@@ -12,9 +12,8 @@ canvas = pygame.Surface((SCREEN_W, SCREEN_H))
 display = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 pygame.display.set_caption('Platformer')
 
-player_images = engine.load_spritesheet('assets/sprites/character.png', 16)
 
-center_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 256), '', (245, 217, 76), (SCREEN_W / 2, SCREEN_H / 2), 'center')
+#center_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 256), '', (245, 217, 76), (SCREEN_W / 2, SCREEN_H / 2), 'center')
 
 
 colliders = []
@@ -29,36 +28,29 @@ direction = STOP
 
 # Cleanup crew:
 
-player = engine.Entity()
-player.transform = engine.Transform(SCREEN_W / 2, SCREEN_H / 3, 64, 64)
-player.animations.add('idle', engine.Animation(player_images[0:3], 2))
-player.animations.add('running', engine.Animation(player_images[8:16], 8))
-player.animations.add('jump', engine.Animation(player_images[8:9], 1))
-player.animations.add('apex', engine.Animation(player_images[9:10], 1))
-player.animations.add('fall', engine.Animation(player_images[10:11], 1))
-player.animations.add('land', engine.Animation(player_images[3:8], 16))
-player.controller = Player(player.transform)
 
-coin_images = engine.load_spritesheet('assets/sprites/coin.png', 8)
+#coin = helper.instantiate('coin', 300, 300, False)
 
-coin = engine.Entity()
-coin.transform = engine.Transform(300, 300, 32, 32)
-coin.animations.add('idle', engine.Animation(coin_images, 14))
-coin.type = 'collectable'
-#coin.camera = engine.Camera(250, 250, 132, 132)
-#coin.camera.set_world_pos(coin.transform.pos.x, coin.transform.pos.y)
+player = helper.instantiate('player', SCREEN_W / 2, 0, False)
+for i in range(10):
+    engine.entities.append(helper.instantiate('coin', SCREEN_W / 2, SCREEN_H / 2 - 60, False))
+
+#dash = helper.instantiate('dash', SCREEN_W / 2, SCREEN_H / 3, False)
 
 camera_sys = engine.CameraSystem()
 player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
 player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
 player.camera.track_entity(player)
+player.gui = engine.GUI(player.camera)
+player.gui.add_sprite(helper.coin_images[0], (10, 10), (32, 32))
+coins_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '1', (245, 217, 76), (50, 2), 'topleft')
+player.gui.add_text(coins_text)
 
-entities = []
-entities.append(coin)
-entities.append(player)
 
-# Delta time (time between frames) function, used for equations that contain time (ex. Distance = Speed * Time)
-# This is used to create frame rate independancy, I.e nomatter how low or how high the fps is, movement is the same
+#engine.entities.append(coin)
+engine.entities.append(player)
+
+score = 0
 
 ####################
 #  Main game loop  #
@@ -79,7 +71,6 @@ while True:
             if event.button == 5: 
                 player.camera.zoom += dt * 6
                 player.camera.zoom = min(player.camera.zoom, 2)
-    print(player.camera.zoom)
     active_keys = pygame.key.get_pressed()
     if active_keys[pygame.K_ESCAPE]:
         pygame.quit()
@@ -101,23 +92,23 @@ while True:
 
     # Update entities
 
-    for entity in entities:
+    for entity in engine.entities:
         entity.animations.animations_list[entity.state].update(dt)
 
         if entity.type == 'collectable':
             if player.transform.get_rect().colliderect(entity.transform.get_rect()):
-                entities.remove(entity)
+                engine.entities.remove(entity)
+                score += 1
                 # TODO Increment score and display it
 
         if entity.controller != None:
             entity.controller.update(dt, colliders)
+    coins_text.set_text(str(score))
 
     # Draw visuals
     canvas.fill((0, 0, 0))
 
-    center_text.draw(canvas)
-
-    camera_sys.update(canvas, entities, colliders)
+    camera_sys.update(canvas, colliders)
 
     display.blit(canvas, (0, 0))
     pygame.display.flip()
