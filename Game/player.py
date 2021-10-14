@@ -1,7 +1,7 @@
 import pygame
 import engine
 import helper
-from settings import *
+from config import *
 
 #################################################
 #  Main player class, used for the player only  #
@@ -30,7 +30,7 @@ class Player():
         self.dash_timer = 1.5 
         self.dash_delay = 1.5
 
-        self.jump_force = 800
+        self.jump_force = 1000
         self.dash_force = 1600
 
         self.health = 3
@@ -41,7 +41,7 @@ class Player():
 
         self.grounded_list = []
 
-    def update(self, dt, colliders):
+    def update(self, dt):
         if self.direction == RIGHT:
             self.transform.mirrored = False
         elif self.direction == LEFT:
@@ -54,11 +54,11 @@ class Player():
 
         self.horizontal_movement(dt)
         self.rect.x = self.transform.pos.x + self.vel.x * dt
-        self.horizontal_collision(colliders)
+        self.horizontal_collision()
         self.rect.x = self.transform.pos.x
         self.vertical_movement(dt)
         self.rect.y = self.transform.pos.y + self.vel.y * dt
-        self.vertical_collision(colliders)
+        self.vertical_collision()
         self.rect.y = self.transform.pos.y
 
         if last_grounded == False and self.is_grounded == True:
@@ -66,7 +66,7 @@ class Player():
 
         self.transform.pos += self.vel * dt
 
-        self.handle_out_of_bounds()
+        #self.handle_out_of_bounds()
 
 
     def horizontal_movement(self, dt):
@@ -96,11 +96,13 @@ class Player():
             engine.entities.append(helper.instantiate('dash', self.rect.right, self.rect.bottom, False))
         self.dash_timer = self.dash_delay
 
-    def horizontal_collision(self, colliders):
-        for collider in colliders:
-            if self.rect.bottom > collider.top and self.rect.top < collider.bottom:
-                if self.rect.right >= collider.left and self.rect.left <= collider.right:
-                    self.vel.x = 0
+    def horizontal_collision(self):
+        for entity in engine.entities:
+            if entity.static_collision:
+                collider = entity.transform.get_rect()
+                if self.rect.bottom > collider.top and self.rect.top < collider.bottom:
+                    if self.rect.right >= collider.left and self.rect.left <= collider.right:
+                        self.vel.x = 0
 
 
     def vertical_movement(self, dt):
@@ -115,17 +117,19 @@ class Player():
         self.vel.y = -self.jump_force
 
 
-    def vertical_collision(self, colliders):
+    def vertical_collision(self):
         self.is_grounded = False
-        for collider in colliders:
-            if self.rect.right > collider.left and self.rect.left < collider.right:
-                if self.rect.bottom >= collider.top and self.rect.top <= collider.bottom:
-                    self.vel.y = 0
-                    if self.transform.pos.y < collider.top:
-                        self.is_grounded = True
+        for entity in engine.entities:
+            if entity.static_collision:
+                collider = entity.transform.get_rect()
+                if self.rect.right > collider.left and self.rect.left < collider.right:
+                    if self.rect.bottom >= collider.top and self.rect.top <= collider.bottom:
+                        self.vel.y = 0
+                        if self.transform.pos.y < collider.top:
+                            self.is_grounded = True
 
-                        # fix wierd bug caused by gravity being constant
-                        self.transform.pos.y = collider.top - self.transform.size.y
+                            # fix wierd bug caused by gravity being constant
+                            self.transform.pos.y = collider.top - self.transform.size.y
 
 
     def handle_out_of_bounds(self):

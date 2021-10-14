@@ -1,7 +1,7 @@
 import pygame, sys, random
 import engine
 import helper
-from settings import *
+from config import *
 
 #######################################
 #  Initialize variables and funcions  #
@@ -12,42 +12,20 @@ canvas = pygame.Surface((SCREEN_W, SCREEN_H))
 display = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 pygame.display.set_caption('Platformer')
 
-
-#center_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 256), '', (245, 217, 76), (SCREEN_W / 2, SCREEN_H / 2), 'center')
-
-
-_colliders = []
-_colliders.append(pygame.Rect(2, 7, 12, 1))
-#_colliders.append(pygame.Rect())
-#_colliders.append(pygame.Rect())
-#_colliders.append(pygame.Rect())
-
 direction = STOP
 
-colliders = []
-for collider in _colliders:
-    colliders.append(pygame.Rect(collider[0] * TILE_SIZE, collider[1] * TILE_SIZE, collider[2] * TILE_SIZE, collider[3] * TILE_SIZE))
-
-
-#coin = helper.instantiate('coin', 300, 300, False)
-
-player = helper.instantiate('player', SCREEN_W / 2, 0, False)
+player = helper.instantiate('player', SCREEN_W / 2, 128, False)
 for i in range(10):
     engine.entities.append(helper.instantiate('coin', SCREEN_W / 2, SCREEN_H / 2 - 60, False))
-
-#dash = helper.instantiate('dash', SCREEN_W / 2, SCREEN_H / 3, False)
-
-camera_sys = engine.CameraSystem()
-player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
-player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
-player.camera.track_entity(player)
 player.gui = engine.GUI(player.camera)
 player.gui.add_sprite(helper.coin_images[0], (10, 10), (32, 32))
 coins_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '1', (245, 217, 76), (50, 2), 'topleft')
 player.gui.add_text(coins_text)
 
+camera_sys = engine.CameraSystem()
 
-#engine.entities.append(coin)
+helper.load_level()
+
 engine.entities.append(player)
 
 score = 0
@@ -93,7 +71,8 @@ while True:
     # Update entities
 
     for entity in engine.entities:
-        entity.animations.animations_list[entity.state].update(dt)
+        if entity.animations != None:
+            entity.animations.animations_list[entity.state].update(dt)
 
         if entity.type == 'collectable':
             if player.transform.get_rect().colliderect(entity.transform.get_rect()):
@@ -102,13 +81,13 @@ while True:
                 # TODO Increment score and display it
 
         if entity.controller != None:
-            entity.controller.update(dt, colliders)
+            entity.controller.update(dt)
     coins_text.set_text(str(score))
 
     # Draw visuals
     canvas.fill((0, 0, 0))
 
-    camera_sys.update(canvas, colliders)
+    camera_sys.update(canvas)
 
     display.blit(canvas, (0, 0))
     pygame.display.flip()

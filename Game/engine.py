@@ -1,5 +1,5 @@
 import pygame, time
-from settings import *
+from config import *
 pygame.font.init()
 
 entities = []
@@ -9,11 +9,11 @@ class System():
         pass
     def check(self, entity):
         return True
-    def update(self, surface, colliders):
+    def update(self, surface):
         for entity in entities:
             if self.check(entity):
-                self._update(surface, entity, colliders)
-    def _update(self, surface, entity, colliders):
+                self._update(surface, entity)
+    def _update(self, surface, entity):
         pass
 
 class CameraSystem(System):
@@ -21,7 +21,7 @@ class CameraSystem(System):
         super().__init__()
     def check(self, entity):
         return entity.camera is not None
-    def _update(self, surface, entity, colliders):
+    def _update(self, surface, entity):
         
         surface.set_clip(entity.camera.get_rect())
         surface.fill((28, 28, 28))
@@ -32,16 +32,20 @@ class CameraSystem(System):
 
         offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
 
-        # Draw platforms
-        for collider in colliders:
-            pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(collider.x / entity.camera.zoom + offset.x, collider.y / entity.camera.zoom + offset.y, collider.width / entity.camera.zoom, collider.height / entity.camera.zoom))
+        offset.y = 0
+        if offset.x > 0:
+            offset.x = 0
+
         # Draw entities
         for e in entities:
-            if e.controller == None:
-                e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
-            else:
-                e.state = e.controller.get_state()
-                e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+            if e.animations != None:
+                if e.controller == None:
+                    e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+                else:
+                    e.state = e.controller.get_state()
+                    e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+            elif e.sprite != None:
+                e.sprite.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
 
         if entity.gui != None:
             entity.gui.draw(surface)
@@ -259,12 +263,25 @@ class GUISprite():
                 self.position[1] + camera.size.height
             ))
 
+class Sprite():
+    def __init__(self, image):
+        self.image = image
+    def draw(self, surface, pos, size, flip_x, flip_y):
+        scaled_image = pygame.transform.scale(self.image, (int(size.x), int(size.y)))
+        flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
+        surface.blit(flipped_image, (int(pos.x), int(pos.y)))
+
 class Entity():
     def __init__(self):
         self.state = 'idle'
         self.type = 'normal'
         self.transform = None
-        self.animations = Animations()
+        # Entity has the option to have sprite/animation but not both
+        self.animations = None
+        self.sprite = None
+
         self.controller = None
         self.camera = None
         self.gui = None
+
+        self.static_collision = False
