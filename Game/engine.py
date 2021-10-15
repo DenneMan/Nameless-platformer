@@ -42,13 +42,15 @@ class CameraSystem(System):
                 if e.controller == None:
                     e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
                 else:
-                    e.state = e.controller.get_state()
-                    e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+                    e.animations.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
             elif e.sprite != None:
                 e.sprite.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
 
         if entity.gui != None:
             entity.gui.draw(surface)
+
+        #collider = entity.controller.collider.get_rect()
+        #pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + offset[0]), int(collider.y / entity.camera.zoom + offset[1]), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
 
         surface.set_clip(None)
 
@@ -83,8 +85,20 @@ class Camera():
 class Animations():
     def __init__(self):
         self.animations_list = {}
+        self.state = 'idle'
+        self.next_state = self.state
     def add(self, state, animation):
         self.animations_list[state] = animation
+    def next(self, state):
+        self.next_state = state
+    def force_skip(self):
+        self.state = self.next_state
+    def draw(self, surface, pos, size, flip_x, flip_y):
+        self.animations_list[self.state].draw(surface, pos, size, flip_x, flip_y)
+    def update(self, dt):
+        if self.animations_list[self.state].update(dt):
+            self.state = self.next_state
+            print(f'Refreshed animations to: {self.state}')
 
 # Class to handle animations
 class Animation():
@@ -94,9 +108,6 @@ class Animation():
         self.image_index = 0
         self.animation_timer = 0
         self.animations_per_second = animations_per_second
-        self.has_looped = False
-        self.repeat = repeat
-        self.allow_draw = True
 
 
     def update(self, dt):
@@ -106,17 +117,10 @@ class Animation():
         if self.animation_timer >= 1 / self.animations_per_second:
             self.image_index += 1
             self.animation_timer = 0
-            self.has_looped = False
             if self.image_index >= len(self.images):
                 # Reset frame when it reaches the end
                 self.image_index = 0
-                self.has_looped = True
-                if self.repeat == False:
-                    self.allow_draw = False
-                    
-
-    def get_looped(self):
-        return self.has_looped
+                return True
 
 
     def set_index(self, index):
@@ -128,10 +132,9 @@ class Animation():
 
 
     def draw(self, surface, pos, size, flip_x, flip_y):
-        if self.allow_draw:
-            scaled_image = pygame.transform.scale(self.images[self.image_index], (int(size.x), int(size.y)))
-            flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
-            surface.blit(flipped_image, (int(pos.x), int(pos.y)))
+        scaled_image = pygame.transform.scale(self.images[self.image_index], (int(size.x), int(size.y)))
+        flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
+        surface.blit(flipped_image, (int(pos.x), int(pos.y)))
 
 
 ###############
@@ -162,7 +165,7 @@ def deltaTime():
     this_frame_time = time.time()
     delta_time = this_frame_time - last_frame_time
     last_frame_time = this_frame_time
-    if delta_time < 0.1:
+    if delta_time < 0.33:
         return delta_time
     else:
         print('Shit\'s fucked ')
@@ -276,6 +279,7 @@ class Entity():
         self.state = 'idle'
         self.type = 'normal'
         self.transform = None
+        self.collider = None
         # Entity has the option to have sprite/animation but not both
         self.animations = None
         self.sprite = None

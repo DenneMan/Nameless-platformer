@@ -8,6 +8,6 @@ As you can see in "LICENSE" this work is under CC-0 which means you can do whate
 # Works from other people that I used
 DOS88: Contact: DOS88XX@gmail.com, Other works: https://www.youtube.com/user/AntiMulletpunk, Work that I used: https://dos88.itch.io/dos-88-music-library
 
-0x72: Contact: norenberg.robert@gmail.com, Other works: https://0x72.itch.io/, Work that I used: https://0x72.itch.io/16x16-industrial-tileset
+aamatniekss: Contact: https://twitter.com/Namatnieks Other works: https://aamatniekss.itch.io/, Work that I used: https://aamatniekss.itch.io/fantasy-knight-free-pixelart-animated-character
 
 Mounir Tohami: Contact: https://twitter.com/MounirTohami, Other works: https://mounirtohami.itch.io/, Work that I used: https://mounirtohami.itch.io/pixel-art-gui-elements

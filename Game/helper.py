@@ -3,7 +3,16 @@ from config import *
 from player import Player
 from coin import Coin
 
-player_images = engine.load_spritesheet('assets/sprites/character.png', 16, 16)
+Run = engine.load_spritesheet('assets/sprites/player/_Run.png', 120, 80)
+Idle = engine.load_spritesheet('assets/sprites/player/_Idle.png', 120, 80)
+Jump = engine.load_spritesheet('assets/sprites/player/_Jump.png', 120, 80)
+Apex = engine.load_spritesheet('assets/sprites/player/_JumpFallInbetween.png', 120, 80)
+Fall = engine.load_spritesheet('assets/sprites/player/_Fall.png', 120, 80)
+Dash = engine.load_spritesheet('assets/sprites/player/_Dash.png', 120, 80)
+Attack = engine.load_spritesheet('assets/sprites/player/_Attack.png', 120, 80)
+Attack2 = engine.load_spritesheet('assets/sprites/player/_Attack2.png', 120, 80)
+
+
 coin_images = engine.load_spritesheet('assets/sprites/coin.png', 8, 8)
 dash_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dash.png', 48, 32)
 dust_landing_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dust_landing.png', 32, 16)
@@ -21,15 +30,18 @@ def instantiate(entity_name, x, y, mirror):
         return dash
     elif entity_name == 'player':
         player = engine.Entity()
-        player.transform = engine.Transform(x, y, 64, 64, mirror)
+        player.transform = engine.Transform(x, y, 360, 240, mirror)
+        player.collider = engine.Transform(x, y, 105, 126, mirror)
         player.animations = engine.Animations()
-        player.animations.add('idle', engine.Animation(player_images[0:3], 2))
-        player.animations.add('running', engine.Animation(player_images[8:16], 8))
-        player.animations.add('jump', engine.Animation(player_images[8:9], 1))
-        player.animations.add('apex', engine.Animation(player_images[9:10], 1))
-        player.animations.add('fall', engine.Animation(player_images[10:11], 1))
-        player.animations.add('land', engine.Animation(player_images[3:8], 16))
-        player.controller = Player(player.transform)
+        player.animations.add('idle', engine.Animation(Idle, 7))
+        player.animations.add('run', engine.Animation(Run, 12))
+        player.animations.add('jump', engine.Animation(Jump, 7))
+        player.animations.add('apex', engine.Animation(Apex, 7))
+        player.animations.add('fall', engine.Animation(Fall, 7))
+        player.animations.add('dash', engine.Animation(Dash, 7))
+        player.animations.add('attack', engine.Animation(Attack, 14))
+        player.animations.add('attack2', engine.Animation(Attack2, 14))
+        player.controller = Player(player)
         player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
         player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
         player.camera.track_entity(player)

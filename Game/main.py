@@ -19,7 +19,7 @@ for i in range(10):
     engine.entities.append(helper.instantiate('coin', SCREEN_W / 2, SCREEN_H / 2 - 60, False))
 player.gui = engine.GUI(player.camera)
 player.gui.add_sprite(helper.coin_images[0], (10, 10), (32, 32))
-coins_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '1', (245, 217, 76), (50, 2), 'topleft')
+coins_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (50, 2), 'topleft')
 player.gui.add_text(coins_text)
 
 camera_sys = engine.CameraSystem()
@@ -29,7 +29,6 @@ helper.load_level()
 engine.entities.append(player)
 
 score = 0
-
 ####################
 #  Main game loop  #
 ####################
@@ -65,14 +64,14 @@ while True:
         player.controller.is_dashing = True
     
     active_buttons = pygame.mouse.get_pressed()
-    if active_buttons[1]:
-        ...
+    if active_buttons[0]:
+        player.controller.attack()
 
     # Update entities
 
     for entity in engine.entities:
         if entity.animations != None:
-            entity.animations.animations_list[entity.state].update(dt)
+            entity.animations.update(dt)
 
         if entity.type == 'collectable':
             if player.transform.get_rect().colliderect(entity.transform.get_rect()):
