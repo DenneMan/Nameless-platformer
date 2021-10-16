@@ -31,8 +31,8 @@ class CameraSystem(System):
             entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / 200) / entity.camera.zoom
 
         offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
-
-        offset.y = 0
+        if offset.y > 0:
+            offset.y = 0
         if offset.x > 0:
             offset.x = 0
 
@@ -98,7 +98,6 @@ class Animations():
     def update(self, dt):
         if self.animations_list[self.state].update(dt):
             self.state = self.next_state
-            print(f'Refreshed animations to: {self.state}')
 
 # Class to handle animations
 class Animation():
@@ -135,7 +134,6 @@ class Animation():
         scaled_image = pygame.transform.scale(self.images[self.image_index], (int(size.x), int(size.y)))
         flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
         surface.blit(flipped_image, (int(pos.x), int(pos.y)))
-
 
 ###############
 #  Functions  #

@@ -1,7 +1,11 @@
 import engine
 from config import *
 from player import Player
+from dummy import Dummy
 from coin import Coin
+import pygame
+
+combo_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (500, 2), 'topleft')
 
 Run = engine.load_spritesheet('assets/sprites/player/_Run.png', 120, 80)
 Idle = engine.load_spritesheet('assets/sprites/player/_Idle.png', 120, 80)
@@ -11,7 +15,16 @@ Fall = engine.load_spritesheet('assets/sprites/player/_Fall.png', 120, 80)
 Dash = engine.load_spritesheet('assets/sprites/player/_Dash.png', 120, 80)
 Attack = engine.load_spritesheet('assets/sprites/player/_Attack.png', 120, 80)
 Attack2 = engine.load_spritesheet('assets/sprites/player/_Attack2.png', 120, 80)
+_Turn = engine.load_spritesheet('assets/sprites/player/_TurnAround.png', 120, 80)
+Wallslide = engine.load_spritesheet('assets/sprites/player/_WallSlide.png', 120, 80)
 
+Turn = []
+for frame in _Turn:
+    frame = pygame.transform.flip(frame, True, False)
+    Turn.append(frame)
+
+Dummy_idle = engine.load_spritesheet('assets/sprites/Test_dummy/idle.png', 32, 32)
+Dummy_hit = engine.load_spritesheet('assets/sprites/Test_dummy/hit.png', 32, 32)
 
 coin_images = engine.load_spritesheet('assets/sprites/coin.png', 8, 8)
 dash_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dash.png', 48, 32)
@@ -31,7 +44,7 @@ def instantiate(entity_name, x, y, mirror):
     elif entity_name == 'player':
         player = engine.Entity()
         player.transform = engine.Transform(x, y, 360, 240, mirror)
-        player.collider = engine.Transform(x, y, 105, 126, mirror)
+        player.collider = engine.Transform(x, y, 70, 126, mirror)
         player.animations = engine.Animations()
         player.animations.add('idle', engine.Animation(Idle, 7))
         player.animations.add('run', engine.Animation(Run, 12))
@@ -41,6 +54,8 @@ def instantiate(entity_name, x, y, mirror):
         player.animations.add('dash', engine.Animation(Dash, 7))
         player.animations.add('attack', engine.Animation(Attack, 14))
         player.animations.add('attack2', engine.Animation(Attack2, 14))
+        player.animations.add('turn', engine.Animation(Turn, 14))
+        player.animations.add('wallslide', engine.Animation(Wallslide, 14))
         player.controller = Player(player)
         player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
         player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
@@ -68,10 +83,25 @@ def make_tile(x, y, index):
     tile.static_collision = True
     return tile
 
-def load_level():
+def make_dummy(x, y, flip):
+    dummy = engine.Entity()
+    dummy.transform = engine.Transform(x, y, 96, 96, flip)
+    dummy.collider = engine.Transform(x, y, 96, 96, flip)
+    dummy.animations = engine.Animations()
+    dummy.animations.add('idle', engine.Animation(Dummy_idle, 10))
+    dummy.animations.add('hit', engine.Animation(Dummy_hit, 10))
+    dummy.controller = Dummy(dummy)
+    dummy.type = 'enemy'
+    return dummy
+    
 
+def load_level():
     for y, list in enumerate(level):
         for x, string in enumerate(list):
             if string != -1:
                 tile = make_tile(x, y, string)
                 engine.entities.append(tile)
+
+def spawn_coins(x, y):
+    for i in range(5):
+        engine.entities.append(instantiate('coin', x - 16, y - 16, False))
