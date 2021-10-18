@@ -50,9 +50,18 @@ class Player():
         self.wallslide_right = False
         self.wallslide_left = False
 
+        self.attack_delay = 0.5
+        self.attack_timer = 0.5
+
     def update(self, dt):
         self.collider.pos.x = self.transform.pos.x + self.transform.size.x / 2 - self.collider.size.x / 2
         self.collider.pos.y = (self.transform.pos.y + self.transform.size.y) - self.collider.size.y
+
+        if self.is_attacking:
+            self.attack_timer -= dt
+            if self.attack_timer <= 0:
+                self.is_attacking = False
+                self.attack_timer = self.attack_delay
 
         if self.transform.mirrored == True:
             is_flipped_last_frame = True
@@ -85,12 +94,11 @@ class Player():
         self.vertical_collision()
         self.rect.y = self.collider.pos.y
 
-        #if last_grounded == False and self.is_grounded == True:
-        #    engine.entities.append(helper.instantiate('dust_landing', self.rect.center[0], self.rect.bottom, False))
+        if last_grounded == False and self.is_grounded == True:
+            engine.entities.append(helper.instantiate('dust_landing', self.rect.center[0], self.rect.bottom, self.transform.mirrored))
 
         self.transform.pos += self.vel * dt
 
-        #self.handle_out_of_bounds()
         self.set_state()
 
 
@@ -148,9 +156,14 @@ class Player():
 
 
     def vertical_movement(self, dt):
-        if self.is_jumping and self.is_grounded:
-            self.jump()
-        self.is_jumping = False
+        if self.is_jumping:
+            if self.is_grounded:
+                self.jump()
+            elif self.wallslide_right:
+                self.wall_jump(LEFT)
+            elif self.wallslide_left:
+                self.wall_jump(RIGHT)
+            self.is_jumping = False
 
         self.wallslide_right = False
         self.wallslide_left = False
@@ -168,6 +181,13 @@ class Player():
     def jump(self):
         self.vel.y = -self.jump_force
 
+    def wall_jump(self, direction):
+        self.vel.y = -self.jump_force
+        if direction == RIGHT:
+            self.vel.x = self.jump_force
+        elif direction == LEFT:
+            self.vel.x = -self.jump_force
+
 
     def vertical_collision(self):
         self.is_grounded = False
@@ -183,37 +203,28 @@ class Player():
                             # fix wierd bug caused by gravity being constant
                             self.transform.pos.y = collider.top - self.transform.size.y
 
-
-    def handle_out_of_bounds(self):
-        # Handle out of bounds on x axis
-        if self.rect.left > SCREEN_W:
-            self.transform.pos.x = 0 + self.transform.size.x
-        if self.rect.right < 0:
-            self.transform.pos.x = SCREEN_W
-        # Handle out of bounds on y axis
-        if self.rect.top > SCREEN_H:
-            self.transform.pos.y = 0 - self.transform.size.y
-        if self.rect.bottom < 0:
-            self.transform.pos.y = SCREEN_H
-
     def attack(self):
         self.is_attacking = True
         self.direction = STOP
 
     def attack_check(self, type):
-        if type == 1:
-            rect = self.transform.get_rect()
-            if self.transform.mirrored:
-                attack_rect = pygame.Rect(rect.x + 30, rect.y, rect.width / 4, rect.height)
-            else:
-                attack_rect = pygame.Rect(rect.x + rect.width - 30 - rect.width / 4, rect.y, rect.width / 4, rect.height)
-        if type == 2:
-            rect = self.transform.get_rect()
-            if self.transform.mirrored:
-                attack_rect = pygame.Rect(rect.x + 30, rect.y, rect.width / 4, rect.height)
-            else:
-                attack_rect = pygame.Rect(rect.x + rect.width - 30 - rect.width / 2, rect.y, rect.width / 2, rect.height)
-        
+        rect = self.transform.get_rect()
+        if self.transform.mirrored:
+            if type == 1:
+                attack_rect = pygame.Rect(rect.x + 10, rect.y + rect.height / 2, rect.width / 4, rect.height / 2)
+            elif type == 2:
+                attack_rect = pygame.Rect(rect.x + 10, rect.y + rect.height / 2, rect.width * 0.7, rect.height / 2)
+        else:
+            if type == 1:
+                attack_rect = pygame.Rect(rect.x + rect.width - 10 - rect.width / 4, rect.y + rect.height / 2, rect.width / 4, rect.height / 2)
+            elif type == 2:
+                attack_rect = pygame.Rect(rect.x + rect.width - 10 - rect.width * 0.7, rect.y + rect.height / 2, rect.width * 0.7, rect.height / 2)
+
+        if DEBUG:
+            attack_entity = engine.Entity()
+            attack_entity.collider = engine.Transform(attack_rect.x, attack_rect.y, attack_rect.width, attack_rect.height, False)
+            engine.entities.append(attack_entity)
+
         for entity in engine.entities:
             if entity.type == 'enemy':
                 if attack_rect.colliderect(entity.collider.get_rect()):
@@ -244,11 +255,11 @@ class Player():
             # IDLE OR RUN
             if -50 < self.vel.x < 50:
                 self.animations.next('idle')
-                if self.animations.state == 'run':
+                if self.animations.state == 'run' or self.animations.state == 'fall':
                     self.animations.force_skip()
             else:
                 self.animations.next('run')
-                if self.animations.state == 'idle':
+                if self.animations.state == 'idle' or self.animations.state == 'fall':
                     self.animations.force_skip()
         else:
             

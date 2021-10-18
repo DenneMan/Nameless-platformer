@@ -77,4 +77,4 @@ class Dummy:
             self.animations.next('hit')
             self.animations.force_skip()
         helper.combo_text.set_text(str(self.combo))
-        helper.spawn_coins(self.collider.pos.x + self.collider.size.x / 2, self.collider.pos.y + self.collider.size.y / 2)
+        helper.spawn_coins(self.collider.pos.x + self.collider.size.x / 2, self.collider.pos.y + self.collider.size.y / 2, 1)

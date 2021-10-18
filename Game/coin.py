@@ -73,6 +73,3 @@ class Coin():
         
         if self.rect.bottom < 0:
             self.transform.pos.y = SCREEN_H
-    
-    def get_state(self):
-        return 'idle'

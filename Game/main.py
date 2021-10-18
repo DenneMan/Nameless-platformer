@@ -30,7 +30,6 @@ helper.load_level()
 engine.entities.append(player)
 engine.entities.append(dummy)
 
-score = 0
 ####################
 #  Main game loop  #
 ####################
@@ -39,6 +38,7 @@ while True:
     dt = engine.deltaTime()
     
     # Get Input
+    hit = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -46,6 +46,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 player.controller.attack()
+                hit = True
             if event.button == 4: 
                 player.camera.zoom -= dt * 6
                 player.camera.zoom = max(player.camera.zoom, 0.1)
@@ -58,12 +59,12 @@ while True:
         sys.exit()
     if active_keys[pygame.K_SPACE]:
         player.controller.is_jumping = True
-    if active_keys[pygame.K_a] and not active_keys[pygame.K_d]:
-        player.controller.direction = LEFT
-    elif active_keys[pygame.K_d] and not active_keys[pygame.K_a]:
-        player.controller.direction = RIGHT
-    else:
-        player.controller.direction = STOP
+    player.controller.direction = STOP
+    if hit == False:
+        if active_keys[pygame.K_a] and not active_keys[pygame.K_d]:
+            player.controller.direction = LEFT
+        elif active_keys[pygame.K_d] and not active_keys[pygame.K_a]:
+            player.controller.direction = RIGHT
     if active_keys[pygame.K_LSHIFT]:
         player.controller.is_dashing = True
     
@@ -71,19 +72,9 @@ while True:
 
     # Update entities
 
-    for entity in engine.entities:
-        if entity.animations != None:
-            entity.animations.update(dt)
+    engine.update(dt, player)
 
-        if entity.type == 'collectable':
-            if player.collider.get_rect().colliderect(entity.transform.get_rect()):
-                engine.entities.remove(entity)
-                score += 1
-                # TODO Increment score and display it
-
-        if entity.controller != None:
-            entity.controller.update(dt)
-    coins_text.set_text(str(score))
+    coins_text.set_text(str(player.score))
 
     # Draw visuals
     canvas.fill((0, 0, 0))

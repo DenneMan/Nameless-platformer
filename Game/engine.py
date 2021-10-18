@@ -31,10 +31,10 @@ class CameraSystem(System):
             entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / 200) / entity.camera.zoom
 
         offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
-        if offset.y > 0:
-            offset.y = 0
-        if offset.x > 0:
-            offset.x = 0
+        #if offset.y > 0:
+        #    offset.y = 0
+        #if offset.x > 0:
+        #    offset.x = 0
 
         # Draw entities
         for e in entities:
@@ -49,8 +49,11 @@ class CameraSystem(System):
         if entity.gui != None:
             entity.gui.draw(surface)
 
-        #collider = entity.controller.collider.get_rect()
-        #pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + offset[0]), int(collider.y / entity.camera.zoom + offset[1]), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
+        if DEBUG:
+            for e in entities:
+                if e.collider != None:
+                    collider = e.collider.get_rect()
+                    pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + offset[0]), int(collider.y / entity.camera.zoom + offset[1]), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
 
         surface.set_clip(None)
 
@@ -102,7 +105,7 @@ class Animations():
 # Class to handle animations
 class Animation():
 
-    def __init__(self, images, animations_per_second, repeat=True):
+    def __init__(self, images, animations_per_second):
         self.images = images
         self.image_index = 0
         self.animation_timer = 0
@@ -282,8 +285,31 @@ class Entity():
         self.animations = None
         self.sprite = None
 
+        score = None
+
         self.controller = None
         self.camera = None
         self.gui = None
 
         self.static_collision = False
+
+        self.destruct = False
+        self.destruct_timer = None
+
+def update(dt, player):
+    for entity in entities:
+        if entity.animations != None:
+            entity.animations.update(dt)
+
+        if entity.type == 'collectable':
+            if player.collider.get_rect().colliderect(entity.transform.get_rect()):
+                entities.remove(entity)
+                player.score += 1
+
+        if entity.destruct:
+            entity.destruct_timer -= dt
+            if entity.destruct_timer <= 0:
+                entities.remove(entity)
+
+        if entity.controller != None:
+            entity.controller.update(dt)
