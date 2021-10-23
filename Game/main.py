@@ -1,6 +1,10 @@
-import pygame, sys, random
+import pygame, sys, pathlib
+
+from pygame import sprite
 import engine
 import helper
+from world import World
+from spritesheet import Spritesheet
 from config import *
 
 #######################################
@@ -13,8 +17,7 @@ display = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 pygame.display.set_caption('Platformer')
 
 direction = STOP
-
-player = helper.instantiate('player', SCREEN_W / 2, 128, False)
+player = helper.instantiate('player', SCREEN_W / 2, 400, False)
 player.gui = engine.GUI(player.camera)
 player.gui.add_sprite(helper.coin_images[0], (10, 10), (32, 32))
 coins_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (50, 2), 'topleft')
@@ -25,10 +28,12 @@ dummy = helper.make_dummy(SCREEN_W / 2, SCREEN_H / 2, False)
 
 camera_sys = engine.CameraSystem()
 
-helper.load_level()
+wall_tileset = engine.load_spritesheet(str(pathlib.Path(__file__).parent.resolve()) + '\\assets\\tilesets\\Walls.png', 32, 32)
+bg_tileset = engine.load_spritesheet(str(pathlib.Path(__file__).parent.resolve()) + '\\assets\\tilesets\\background\\background.png', 32, 32)
+world = World(wall_tileset, bg_tileset, str(pathlib.Path(__file__).parent.resolve()) + '\\assets\\tilesets\\walls\\Map.json')
 
-engine.entities.append(player)
 engine.entities.append(dummy)
+engine.entities.append(player)
 
 ####################
 #  Main game loop  #
@@ -39,6 +44,7 @@ while True:
     
     # Get Input
     hit = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -80,6 +86,6 @@ while True:
     canvas.fill((0, 0, 0))
 
     camera_sys.update(canvas)
-
+    
     display.blit(canvas, (0, 0))
     pygame.display.flip()

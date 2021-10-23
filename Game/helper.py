@@ -3,6 +3,7 @@ from config import *
 from player import Player
 from dummy import Dummy
 from coin import Coin
+from creative import CreativePlayer
 import pygame
 
 combo_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (500, 2), 'topleft')
@@ -40,90 +41,90 @@ Dummy_hit = engine.load_spritesheet('assets/sprites/Test_dummy/hit.png', 32, 32)
 coin_images = engine.load_spritesheet('assets/sprites/coin.png', 8, 8)
 dash_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dash.png', 48, 32)
 dust_landing_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dust_landing.png', 32, 16)
-tileset = engine.load_spritesheet('assets/tileset/tileset.png', 16, 16)
+tileset = engine.load_spritesheet('assets/tilesets/tileset.png', 16, 16)
 
 def instantiate(entity_name, x, y, mirror):
     if entity_name == 'dash':
-        dust_trail = engine.Entity()
+        entity = engine.Entity()
+        entity.name == 'dash'
         if mirror:
-            dust_trail.transform = engine.Transform(x, y - 128, 192, 128, mirror)
+            entity.transform = engine.Transform(x, y - 128, 192, 128, mirror)
         else:
-            dust_trail.transform = engine.Transform(x - 192, y - 128, 192, 128, mirror)
-        dust_trail.animations = engine.Animations()
-        dust_trail.animations.add('idle', engine.Animation(dash_images[0:8], 10))
-        dust_trail.destruct = True
-        dust_trail.destruct_timer = 0.8
-        return dust_trail
+            entity.transform = engine.Transform(x - 192, y - 128, 192, 128, mirror)
+        entity.animations = engine.Animations()
+        entity.animations.add('idle', engine.Animation(dash_images[0:8], 10))
+        entity.destruct = True
+        entity.destruct_timer = 0.8
+        return entity
     elif entity_name == 'player':
-        player = engine.Entity()
-        player.transform = engine.Transform(x, y, 480, 320, mirror)
-        player.collider = engine.Transform(x, y, 90, 168, mirror)
-        player.animations = engine.Animations()
-        player.animations.add('idle', engine.Animation(idle, 7))
-        player.animations.add('run', engine.Animation(run, 12))
-        player.animations.add('jump', engine.Animation(jump, 7))
-        player.animations.add('apex', engine.Animation(apex, 7))
-        player.animations.add('fall', engine.Animation(fall, 7))
-        player.animations.add('dash', engine.Animation(dash, 7))
-        player.animations.add('attack', engine.Animation(attack, 14))
-        player.animations.add('attack2', engine.Animation(attack2, 14))
-        player.animations.add('turn', engine.Animation(turn, 14))
-        player.animations.add('wallslide', engine.Animation(wallslide, 14))
-        player.controller = Player(player)
-        player.score = 0
-        player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
-        player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
-        player.camera.track_entity(player)
-        return player
+        entity = engine.Entity()
+        entity.name = 'player'
+        entity.transform = engine.Transform(x, y, 480, 320, mirror)
+        entity.collider = engine.Transform(x, y, 95, 150, mirror)
+        entity.animations = engine.Animations()
+        entity.animations.add('idle', engine.Animation(idle, 7))
+        entity.animations.add('run', engine.Animation(run, 12))
+        entity.animations.add('jump', engine.Animation(jump, 7))
+        entity.animations.add('apex', engine.Animation(apex, 7))
+        entity.animations.add('fall', engine.Animation(fall, 7))
+        entity.animations.add('dash', engine.Animation(dash, 7))
+        entity.animations.add('attack', engine.Animation(attack, 14))
+        entity.animations.add('attack2', engine.Animation(attack2, 14))
+        entity.animations.add('turn', engine.Animation(turn, 14))
+        entity.animations.add('wallslide', engine.Animation(wallslide, 14))
+        entity.controller = Player(entity)
+        entity.score = 0
+        entity.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
+        entity.camera.set_world_pos(entity.transform.pos.x, entity.transform.pos.y)
+        entity.camera.track_entity(entity)
+        return entity
     elif entity_name == 'coin':
-        coin = engine.Entity()
-        coin.transform = engine.Transform(x, y, 32, 32, mirror)
-        coin.animations = engine.Animations()
-        coin.animations.add('idle', engine.Animation(coin_images, 14))
-        coin.controller = Coin(coin.transform)
-        coin.type = 'collectable'
-        return coin
+        entity = engine.Entity()
+        entity.name = 'coin'
+        entity.transform = engine.Transform(x, y, 32, 32, mirror)
+        entity.collider = engine.Transform(x, y, 32, 32, mirror)
+        entity.animations = engine.Animations()
+        entity.animations.add('idle', engine.Animation(coin_images, 14))
+        entity.controller = Coin(entity)
+        entity.type = 'collectable'
+        return entity
     elif entity_name == 'dust_landing':
-        dust_landing = engine.Entity()
+        entity = engine.Entity()
+        entity.name = 'dust_landing'
         if mirror:
-            dust_landing.transform = engine.Transform(x - 48, y - 64, 128, 64, mirror)
+            entity.transform = engine.Transform(x - 48, y - 64, 128, 64, mirror)
         else:
-            dust_landing.transform = engine.Transform(x - 80, y - 64, 128, 64, mirror)
-        dust_landing.animations = engine.Animations()
-        dust_landing.animations.add('idle', engine.Animation(dust_landing_images[0:8], 10))
-        dust_landing.destruct = True
-        dust_landing.destruct_timer = 0.8
-        return dust_landing
-
-def make_tile(x, y, index):
-    tile = engine.Entity()
-    tile.transform = engine.Transform(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, False)
-    tile.sprite = engine.Sprite(tileset[index])
-    tile.static_collision = True
-    return tile
+            entity.transform = engine.Transform(x - 80, y - 64, 128, 64, mirror)
+        entity.animations = engine.Animations()
+        entity.animations.add('idle', engine.Animation(dust_landing_images[0:8], 10))
+        entity.destruct = True
+        entity.destruct_timer = 0.8
+        return entity
 
 def make_dummy(x, y, flip):
-    dummy = engine.Entity()
-    dummy.transform = engine.Transform(x, y, 128, 128, flip)
+    entity = engine.Entity()
+    entity.name = 'dummy'
+    entity.transform = engine.Transform(x, y, 128, 128, flip)
     if flip:
         ...
     else:
-        dummy.collider = engine.Transform(x, y, 64, 128, flip)
-    dummy.animations = engine.Animations()
-    dummy.animations.add('idle', engine.Animation(Dummy_idle, 10))
-    dummy.animations.add('hit', engine.Animation(Dummy_hit, 10))
-    dummy.controller = Dummy(dummy)
-    dummy.type = 'enemy'
-    return dummy
-    
-
-def load_level():
-    for y, list in enumerate(level):
-        for x, string in enumerate(list):
-            if string != -1:
-                tile = make_tile(x, y, string)
-                engine.entities.append(tile)
+        entity.collider = engine.Transform(x, y, 64, 128, flip)
+    entity.animations = engine.Animations()
+    entity.animations.add('idle', engine.Animation(Dummy_idle, 10))
+    entity.animations.add('hit', engine.Animation(Dummy_hit, 10))
+    entity.controller = Dummy(entity)
+    entity.type = 'enemy'
+    return entity
 
 def spawn_coins(x, y, amount):
     for i in range(amount):
         engine.entities.append(instantiate('coin', x - 16, y - 16, False))
+
+def make_moveable_empty(x, y):
+    player = engine.Entity()
+    player.transform = engine.Transform(x, y, 1, 1, False)
+    player.controller = CreativePlayer(player)
+    player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
+    player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
+    player.camera.track_entity(player)
+    return player

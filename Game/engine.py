@@ -24,27 +24,21 @@ class CameraSystem(System):
     def _update(self, surface, entity):
         
         surface.set_clip(entity.camera.get_rect())
-        surface.fill((28, 28, 28))
+        surface.fill((39, 39, 54))
 
         if entity.camera.tracked_entity != None:
-            entity.camera.world_x += ((entity.camera.tracked_entity.transform.pos.x + entity.camera.tracked_entity.transform.size.x / 2 - entity.camera.world_x) / 200) / entity.camera.zoom
-            entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / 200) / entity.camera.zoom
+            entity.camera.world_x += ((entity.camera.tracked_entity.transform.pos.x + entity.camera.tracked_entity.transform.size.x / 2 - entity.camera.world_x) / 100) / entity.camera.zoom
+            entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / 25) / entity.camera.zoom
 
-        offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
-        #if offset.y > 0:
-        #    offset.y = 0
-        #if offset.x > 0:
-        #    offset.x = 0
+        self.offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
+        #if self.offset.y > 0:
+        #    self.offset.y = 0
+        #if self.offset.x > 0:
+        #    self.offset.x = 0
 
         # Draw entities
         for e in entities:
-            if e.animations != None:
-                if e.controller == None:
-                    e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
-                else:
-                    e.animations.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
-            elif e.sprite != None:
-                e.sprite.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+            self.draw_entity(e, surface, entity, self.offset)
 
         if entity.gui != None:
             entity.gui.draw(surface)
@@ -53,9 +47,23 @@ class CameraSystem(System):
             for e in entities:
                 if e.collider != None:
                     collider = e.collider.get_rect()
-                    pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + offset[0]), int(collider.y / entity.camera.zoom + offset[1]), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
+                    pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + self.offset[0]), int(collider.y / entity.camera.zoom + self.offset[1]), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
 
         surface.set_clip(None)
+    
+    def draw_entity(self, e, surface, entity, offset):
+        if e.animations != None:
+            if e.controller == None:
+                e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+            else:
+                e.animations.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+        elif e.sprite != None:
+            e.sprite.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+        if e.children != None:
+            for child in e.children:
+                if type(e.children) == dict:
+                    child = e.children[child]
+                self.draw_entity(child, surface, entity, offset)
 
 ################
 #  Components  #
@@ -277,6 +285,8 @@ class Sprite():
 
 class Entity():
     def __init__(self):
+        self.name = None
+
         self.state = 'idle'
         self.type = 'normal'
         self.transform = None
@@ -295,6 +305,7 @@ class Entity():
 
         self.destruct = False
         self.destruct_timer = None
+        self.children = None
 
 def update(dt, player):
     for entity in entities:

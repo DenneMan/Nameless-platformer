@@ -10,6 +10,7 @@ class Dummy:
         self.collider.pos.x = self.transform.pos.x + self.transform.size.x - self.collider.pos.x
         self.collider.pos.y = self.transform.pos.y + self.transform.size.y - self.collider.pos.y
         self.animations = _self.animations
+        self.difference = pygame.math.Vector2((self.transform.size.x - self.collider.size.x) / 2, self.transform.size.y - self.collider.size.y)
 
         
         self.rect = self.collider.get_rect()
@@ -42,12 +43,27 @@ class Dummy:
         ...
 
     def horizontal_collision(self):
+        self.collide_wall = False
         for entity in engine.entities:
-            if entity.static_collision:
-                collider = entity.transform.get_rect()
-                if self.rect.bottom > collider.top and self.rect.top < collider.bottom:
-                    if self.rect.right >= collider.left and self.rect.left <= collider.right:
-                        self.vel.x = 0
+            if entity.children != None:
+                for child in entity.children:
+                    if type(entity.children) == dict:
+                        child = entity.children[child]
+                    self._horizontal_collision(child)
+            else:
+                self._horizontal_collision(entity)
+    def _horizontal_collision(self, entity):
+        if entity.static_collision:
+            collider = entity.transform.get_rect()
+            if self.rect.bottom > collider.top and self.rect.top < collider.bottom:
+                if self.rect.right >= collider.left and self.rect.left <= collider.right:
+                    self.vel.x = 0
+                    self.collide_wall = True
+
+                    if self.collider.pos.x < collider.left:
+                        self.transform.pos.x = collider.left - self.transform.size.x + self.difference.x
+                    else:
+                        self.transform.pos.x = collider.right - self.difference.x + 1
 
 
     def vertical_movement(self, dt):
@@ -58,16 +74,25 @@ class Dummy:
     def vertical_collision(self):
         self.is_grounded = False
         for entity in engine.entities:
-            if entity.static_collision:
-                collider = entity.transform.get_rect()
-                if self.rect.right > collider.left and self.rect.left < collider.right:
-                    if self.rect.bottom >= collider.top and self.rect.top <= collider.bottom:
-                        self.vel.y = 0
-                        if self.transform.pos.y < collider.top:
-                            self.is_grounded = True
+            if entity.children != None:
+                for child in entity.children:
+                    if type(entity.children) == dict:
+                        child = entity.children[child]
+                    self._vertical_collision(child)
+            else:
+                self._vertical_collision(entity)
+    def _vertical_collision(self, entity):
+        if entity.static_collision:
+            collider = entity.transform.get_rect()
+            if self.rect.right > collider.left and self.rect.left < collider.right:
+                if self.rect.bottom >= collider.top and self.rect.top <= collider.bottom:
+                    self.vel.y = 0
+                    if self.collider.pos.y < collider.top:
+                        self.is_grounded = True
 
-                            # fix wierd bug caused by gravity being constant
-                            self.transform.pos.y = collider.top - self.transform.size.y
+                        self.transform.pos.y = collider.top - self.transform.size.y
+                    else:
+                        self.transform.pos.y = collider.bottom - self.difference.y + 1
     
     def hit(self):
         self.combo += 1
