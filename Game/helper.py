@@ -63,7 +63,7 @@ def instantiate(entity_name, x, y, mirror):
         entity.collider = engine.Transform(x, y, 95, 150, mirror)
         entity.animations = engine.Animations()
         entity.animations.add('idle', engine.Animation(idle, 7))
-        entity.animations.add('run', engine.Animation(run, 12))
+        entity.animations.add('run', engine.Animation(run, 14)) #12
         entity.animations.add('jump', engine.Animation(jump, 7))
         entity.animations.add('apex', engine.Animation(apex, 7))
         entity.animations.add('fall', engine.Animation(fall, 7))

@@ -3,7 +3,7 @@ import engine
 import helper
 from config import *
 
-class Dummy():
+class Enemy():
     def __init__(self, _self):
         self.transform = _self.transform
         self.collider = _self.collider
@@ -12,14 +12,12 @@ class Dummy():
         self.animations = _self.animations
         self.difference = pygame.math.Vector2((self.transform.size.x - self.collider.size.x) / 2, self.transform.size.y - self.collider.size.y)
 
-        
+        self.direction = RIGHT
         self.rect = self.collider.get_rect()
         self.vel = pygame.math.Vector2(0, 0)
         self.terminal_velocity = 1500
         self.is_grounded = False
         self.friction = 6.4
-
-        self.combo = 0
         
     def update(self, dt):
         self.animations.next('idle')
@@ -40,7 +38,22 @@ class Dummy():
 
 
     def horizontal_movement(self, dt):
-        ...
+        self.dash_timer -= dt
+
+        if self.direction == LEFT:
+            self.vel.x -= self.acceleration * dt
+        if self.direction == RIGHT:
+            self.vel.x += self.acceleration * dt
+        if self.is_dashing and self.dash_timer < 0:
+            self.dash(self.direction)
+        self.is_dashing = False
+        # Slow the entity down if speed is over max speed
+        if self.vel.x > self.max_speed or self.vel.x < -self.max_speed:
+            self.vel.x *= 1 - dt * 5
+
+        if (self.vel.x > 0 and self.direction == LEFT) or (self.vel.x < 0 and self.direction == RIGHT) or self.direction == STOP:
+            if self.is_grounded:
+                self.vel.x -= self.vel.x * self.friction * dt
 
     def horizontal_collision(self):
         self.collide_wall = False
@@ -95,11 +108,9 @@ class Dummy():
                         self.transform.pos.y = collider.bottom - self.difference.y + 1
     
     def hit(self):
-        self.combo += 1
         if self.animations.state == 'hit':
             self.animations.animations_list['hit'].image_index = 0
         else:
             self.animations.next('hit')
             self.animations.force_skip()
-        helper.combo_text.set_text(str(self.combo))
         helper.spawn_coins(self.collider.pos.x + self.collider.size.x / 2, self.collider.pos.y + self.collider.size.y / 2, 1)

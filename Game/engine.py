@@ -39,15 +39,14 @@ class CameraSystem(System):
         # Draw entities
         for e in entities:
             self.draw_entity(e, surface, entity, self.offset)
-
-        if entity.gui != None:
-            entity.gui.draw(surface)
-
-        if DEBUG:
-            for e in entities:
+            if DEBUG:
                 if e.collider != None:
                     collider = e.collider.get_rect()
                     pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + self.offset[0]), int(collider.y / entity.camera.zoom + self.offset[1]), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
+
+
+        if entity.gui != None:
+            entity.gui.draw(surface)
 
         surface.set_clip(None)
     
