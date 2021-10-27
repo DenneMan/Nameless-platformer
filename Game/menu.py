@@ -5,6 +5,25 @@ from world import World
 from config import *
 import game
 
+class Menu():
+    def __init__(self, game):
+        self.game = game
+        self.run_display = True
+    
+    def draw(self):
+        self.game.window.blit(self.game.canvas, (0, 0))
+        pygame.display.update()
+        self.reset_keys
+
+class MainMenu(Menu):
+    def __init__(self, game):
+        super.__init__()
+        self.state = "Start"
+
+
+
+
+
 def Main():
     #######################################
     #  Initialize variables and funcions  #

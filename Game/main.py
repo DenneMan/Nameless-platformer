@@ -1,4 +1,8 @@
-import game
-import main_menu
+from game import Game
+import menu
 
-main_menu.Main()
+g = Game()
+
+while g.running:
+    g.playing = True
+    g.game_loop()
