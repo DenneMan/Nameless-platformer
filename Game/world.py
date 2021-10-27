@@ -31,7 +31,7 @@ class World():
         background_tiles = {}
         with open(level, 'r') as f:
             data = json.load(f)
-            width = data['layers']['walls']['width']
+            self.width = data['layers']['walls']['width']
             level = data['layers']['walls']['data']
             bg = data['layers']['background']['data']
             current_x = 0
@@ -42,7 +42,7 @@ class World():
                     tiles[str(pos)] = self.make_tile(current_x, current_y, wall_index - 5)
 
                 current_x += 1
-                if current_x >= width:
+                if current_x >= self.width:
                     current_x = 0
                     current_y += 1
             current_x = 0
@@ -53,7 +53,7 @@ class World():
                     background_tiles[str(pos)] = self.make_bg_tile(current_x, current_y, bg_index - 5 - 48)
 
                 current_x += 1
-                if current_x >= width:
+                if current_x >= self.width:
                     current_x = 0
                     current_y += 1
         world = engine.Entity()

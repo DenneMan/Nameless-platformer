@@ -27,8 +27,8 @@ class CameraSystem(System):
         surface.fill((39, 39, 54))
 
         if entity.camera.tracked_entity != None:
-            entity.camera.world_x += ((entity.camera.tracked_entity.transform.pos.x + entity.camera.tracked_entity.transform.size.x / 2 - entity.camera.world_x) / 100) / entity.camera.zoom
-            entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / 25) / entity.camera.zoom
+            entity.camera.world_x += ((entity.camera.tracked_entity.transform.pos.x + entity.camera.tracked_entity.transform.size.x / 2 - entity.camera.world_x) / LERP_SPEED[0]) / entity.camera.zoom
+            entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / LERP_SPEED[1]) / entity.camera.zoom
 
         self.offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
         #if self.offset.y > 0:
@@ -42,22 +42,25 @@ class CameraSystem(System):
             if DEBUG:
                 if e.collider != None:
                     collider = e.collider.get_rect()
-                    pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + self.offset[0]), int(collider.y / entity.camera.zoom + self.offset[1]), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
+                    pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom) // 4, int(collider.y / entity.camera.zoom) // 4, int(collider.width / entity.camera.zoom) // 4, int(collider.height / entity.camera.zoom) // 4))
 
-
-        if entity.gui != None:
-            entity.gui.draw(surface)
+        #TODO - Fix gui, Reason: I made the preformance better by drawing individual pixels instead of 4 pixels per pixel
+        #if entity.gui != None:
+        #    entity.gui.draw(surface)
 
         surface.set_clip(None)
     
     def draw_entity(self, e, surface, entity, offset):
+        if e.transform != None:
+            entity_pos = (e.transform.pos / entity.camera.zoom) / 4
+            entity_size = (e.transform.size / entity.camera.zoom) // 4
         if e.animations != None:
             if e.controller == None:
-                e.animations.animations_list[e.state].draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+                e.animations.animations_list[e.state].draw(surface, entity_pos, entity_size, e.transform.mirrored, False)
             else:
-                e.animations.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+                e.animations.draw(surface, entity_pos, entity_size, e.transform.mirrored, False)
         elif e.sprite != None:
-            e.sprite.draw(surface, e.transform.pos / entity.camera.zoom + offset, e.transform.size / entity.camera.zoom, e.transform.mirrored, False)
+            e.sprite.draw(surface, entity_pos, entity_size, e.transform.mirrored, False)
         if e.children != None:
             for child in e.children:
                 if type(e.children) == dict:
@@ -184,7 +187,7 @@ def deltaTime():
 ##################
 
 # Sophisticated text creator that has way more features than basic pygame text
-class GUIText(pygame.sprite.Sprite):
+class Text(pygame.sprite.Sprite):
 
     def __init__(self, font, text, color, position, anchor):
         pygame.sprite.Sprite.__init__(self)

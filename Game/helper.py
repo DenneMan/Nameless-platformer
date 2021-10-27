@@ -6,7 +6,7 @@ from coin import Coin
 from creative import CreativePlayer
 import pygame
 
-combo_text = engine.GUIText(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (500, 2), 'topleft')
+combo_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (500, 2), 'topleft')
 
 #Run = engine.load_spritesheet('assets/sprites/player/_Run.png', 120, 80)
 #Idle = engine.load_spritesheet('assets/sprites/player/_Idle.png', 120, 80)
