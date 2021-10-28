@@ -1,6 +1,7 @@
 import pygame, sys, pathlib, time
 import engine
 import helper
+from datetime import datetime
 from world import World
 from config import *
 import game
@@ -17,9 +18,49 @@ class Menu():
 
 class MainMenu(Menu):
     def __init__(self, game):
-        super.__init__()
+        Menu.__init__(self, game)
+        self.small_canvas = pygame.Surface((240, 135))
         self.state = "Start"
 
+        self.back_x = 0
+        self.mid_x = 0
+        self.front_x = 0
+    
+    def display_menu(self):
+
+        current_hour = int(str(datetime.now().time())[:2])
+        if current_hour >= 20 or current_hour <= 5:
+            cycle = 'Night\\'
+        else:
+            cycle = 'Day\\'
+        self.background = self.import_background(cycle)
+        self.title = pygame.transform.scale(pygame.image.load('assets\\sprites\\KingsQuest.png').convert_alpha(), (129 * 8, 39 * 8))
+
+        self.displaying = True
+        while self.displaying:
+            self.dt = engine.deltaTime()
+            self.game.get_keys()
+            self.handle_parallax()
+            self.game.canvas.blit(self.title, (SCREEN_W / 2 - self.title.get_width() / 2, 5 * 8))
+            self.game.reset_keys()
+            self.game.display.blit(self.game.canvas, (0, 0))
+            pygame.display.flip()
+
+    def import_background(self, cycle):
+        directory = 'assets\\sprites\\Parallax Pixel Skies\\'
+        images = [
+            [pygame.transform.scale(pygame.image.load(directory + cycle + 'back.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
+            [pygame.transform.scale(pygame.image.load(directory + cycle + 'mid.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
+            [pygame.transform.scale(pygame.image.load(directory + cycle + 'front.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)]]
+        return images
+
+    def handle_parallax(self):
+        for i, image in enumerate(self.background):
+            image[1].x -= self.dt * i * 20 + self.dt * 10
+            if image[1].x < -SCREEN_W:
+                image[1].x = 0
+            self.game.canvas.blit(image[0], (image[1].x, 0))
+            self.game.canvas.blit(image[0], (image[1].x + SCREEN_W, 0))
 
 
 
@@ -67,6 +108,3 @@ def Main():
 
         display.blit(canvas, (0, 0))
         pygame.display.update()
-
-if __name__ == "__main__":
-    Main()

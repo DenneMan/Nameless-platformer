@@ -1,5 +1,5 @@
 SCREEN_W, SCREEN_H = 1920, 1080
-SCREEN_W, SCREEN_H = (1920 // 10) * 6, (1080 // 10) * 6
+#SCREEN_W, SCREEN_H = (1920 // 10) * 6, (1080 // 10) * 6
 
 WORLD_SIZE = None
 

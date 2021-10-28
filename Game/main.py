@@ -4,5 +4,5 @@ import menu
 g = Game()
 
 while g.running:
-    g.playing = True
+    g.current_menu.display_menu()
     g.game_loop()

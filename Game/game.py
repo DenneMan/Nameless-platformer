@@ -1,6 +1,7 @@
 import pygame, sys, pathlib, time
 import engine
 import helper
+from menu import MainMenu
 from world import World
 from config import *
 
@@ -52,6 +53,7 @@ class Game():
         engine.entities.append(self.player)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
+        self.current_menu = MainMenu(self)
 
     def game_loop(self):
         while self.playing:
@@ -98,6 +100,7 @@ class Game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running, self.playing = False, False
+                self.current_menu.displaying = False
             # Mouse input
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
