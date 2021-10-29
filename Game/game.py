@@ -1,7 +1,7 @@
 import pygame, sys, pathlib, time
 import engine
 import helper
-from menu import MainMenu
+from menu import Loading
 from world import World
 from config import *
 
@@ -36,7 +36,6 @@ class Game():
 
         self.player = helper.instantiate('player', SCREEN_W / 2, 400, False)
         self.player.gui = engine.GUI(self.player.camera)
-        self.player.gui.add_sprite(helper.coin_images[0], (10, 10), (32, 32))
         coins_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (50, 2), 'topleft')
         self.player.gui.add_text(coins_text)
         self.player.gui.add_text(helper.combo_text)
@@ -53,7 +52,7 @@ class Game():
         engine.entities.append(self.player)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
-        self.current_menu = MainMenu(self)
+        self.current_menu = Loading(self)
 
     def game_loop(self):
         while self.playing:

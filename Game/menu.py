@@ -16,32 +16,55 @@ class Menu():
         pygame.display.update()
         self.reset_keys
 
-class MainMenu(Menu):
+class Loading(Menu):
     def __init__(self, game):
         Menu.__init__(self, game)
+        self.game.display
         self.small_canvas = pygame.Surface((240, 135))
-        self.state = "Start"
+        self.state = 'Intro'
 
         self.back_x = 0
         self.mid_x = 0
         self.front_x = 0
-    
-    def display_menu(self):
+
+        self.settings_icon = engine.load_spritesheet('assets\\sprites\\Settings_icon.png', 29, 30)
+        #self.settings_icon = pygame.transform.scale(self.settings_icon, (self.settings_icon.get_width() * 4, self.settings_icon.get_height() * 4))
+
+    def display(self):
 
         current_hour = int(str(datetime.now().time())[:2])
         if current_hour >= 20 or current_hour <= 5:
-            cycle = 'Night\\'
+            cycle = 'Night'
         else:
-            cycle = 'Day\\'
+            cycle = 'Day'
         self.background = self.import_background(cycle)
-        self.title = pygame.transform.scale(pygame.image.load('assets\\sprites\\KingsQuest.png').convert_alpha(), (129 * 8, 39 * 8))
+        self.title = pygame.image.load('assets\\sprites\\KingsQuest.png').convert_alpha()
+        self.title = pygame.transform.scale(self.title, (self.title.get_width() * 8, self.title.get_height() * 8))
+        title_vel_y = 5
+        self.title_pos_y = -self.title.get_height()
+        stage_two = False
 
         self.displaying = True
         while self.displaying:
             self.dt = engine.deltaTime()
             self.game.get_keys()
             self.handle_parallax()
-            self.game.canvas.blit(self.title, (SCREEN_W / 2 - self.title.get_width() / 2, 5 * 8))
+            if self.state == 'Intro':
+                self.title_pos_y += title_vel_y
+                if title_vel_y < 0.2:
+                    stage_two = True
+                if stage_two:
+                    title_vel_y += self.dt * 10
+                else:
+                    title_vel_y *= 1 - self.dt
+                self.game.canvas.blit(self.title, (SCREEN_W / 2 - self.title.get_width() / 2, self.title_pos_y))
+                if self.title_pos_y > SCREEN_H:
+                    self.state = 'Main'
+                    self.main_transparancy = 0
+            elif self.state == 'Main':
+                self.main_transparancy += self.dt
+                self.game.canvas.blit(self.settings_icon, (0, 0))
+
             self.game.reset_keys()
             self.game.display.blit(self.game.canvas, (0, 0))
             pygame.display.flip()
@@ -49,9 +72,9 @@ class MainMenu(Menu):
     def import_background(self, cycle):
         directory = 'assets\\sprites\\Parallax Pixel Skies\\'
         images = [
-            [pygame.transform.scale(pygame.image.load(directory + cycle + 'back.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
-            [pygame.transform.scale(pygame.image.load(directory + cycle + 'mid.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
-            [pygame.transform.scale(pygame.image.load(directory + cycle + 'front.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)]]
+            [pygame.transform.scale(pygame.image.load(directory + cycle + '\\back.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
+            [pygame.transform.scale(pygame.image.load(directory + cycle + '\\mid.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
+            [pygame.transform.scale(pygame.image.load(directory + cycle + '\\front.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)]]
         return images
 
     def handle_parallax(self):
@@ -108,3 +131,31 @@ def Main():
 
         display.blit(canvas, (0, 0))
         pygame.display.update()
+
+class Button():
+    def __init__(self, rect, color=None, highlight_color=None, image=None, highlight_image=None):
+        self.rect = rect
+        if image != None and highlight_image != None:
+            self.default_image = image
+            self.highlight_image = highlight_image
+            self.image = self.default_image
+        elif color != None and highlight_color != None:
+            self.default_image = pygame.Surface((rect.w, rect.h))
+            self.default_image.fill(color)
+            self.highlight_image = pygame.Surface((rect.w, rect.h))
+            self.highlight_image.fill(highlight_color)
+            self.image = self.default_image
+        else:
+            print('Error in <class: Button> because of insufficient arguments')
+    
+    def handle_highlight(self, mouse_pos):
+        if self.rect.collidepoint(mouse_pos):
+            self.image = self.highlight_image
+        else:
+            self.image = self.default_image
+
+    def handle_pressing(self, mouse_pos):
+        ...
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)

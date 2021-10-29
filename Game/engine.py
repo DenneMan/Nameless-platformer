@@ -31,14 +31,10 @@ class CameraSystem(System):
             entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / LERP_SPEED[1]) / entity.camera.zoom
 
         self.offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
-        #if self.offset.y > 0:
-        #    self.offset.y = 0
-        #if self.offset.x > 0:
-        #    self.offset.x = 0
 
         # Draw entities
         for e in entities:
-            self.draw_entity(e, surface, entity, self.offset)
+            self.draw_entity(e, surface, entity)
             if DEBUG:
                 if e.collider != None:
                     collider = e.collider.get_rect()
@@ -50,7 +46,7 @@ class CameraSystem(System):
 
         surface.set_clip(None)
     
-    def draw_entity(self, e, surface, entity, offset):
+    def draw_entity(self, e, surface, entity):
         if e.transform != None:
             entity_pos = (e.transform.pos / entity.camera.zoom) / 4
             entity_size = (e.transform.size / entity.camera.zoom) // 4
@@ -65,7 +61,7 @@ class CameraSystem(System):
             for child in e.children:
                 if type(e.children) == dict:
                     child = e.children[child]
-                self.draw_entity(child, surface, entity, offset)
+                self.draw_entity(child, surface, entity)
 
 ################
 #  Components  #
@@ -154,7 +150,7 @@ class Animation():
 
 # Loads images from spritesheet to a list of images
 def load_spritesheet(filename, sprite_width, sprite_height):
-    spritesheet = pygame.image.load(filename)
+    spritesheet = pygame.image.load(filename).convert_alpha()
     spritesheet_rect = spritesheet.get_rect()
     sprites_x = int(spritesheet_rect.width / sprite_width)
     sprites_y = int(spritesheet_rect.height / sprite_height)

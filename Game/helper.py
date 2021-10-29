@@ -24,24 +24,9 @@ combo_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), 
 #    frame = pygame.transform.flip(frame, True, False)
 #    Turn.append(frame)
 
-run = engine.load_spritesheet('assets/sprites/MyCharacter/run.png', 120, 80)
-idle = engine.load_spritesheet('assets/sprites/MyCharacter/idle.png', 120, 80)
-jump = engine.load_spritesheet('assets/sprites/MyCharacter/jump.png', 120, 80)
-apex = engine.load_spritesheet('assets/sprites/MyCharacter/apex.png', 120, 80)
-fall = engine.load_spritesheet('assets/sprites/MyCharacter/fall.png', 120, 80)
-dash = engine.load_spritesheet('assets/sprites/MyCharacter/dash.png', 120, 80)
-attack = engine.load_spritesheet('assets/sprites/MyCharacter/attack.png', 120, 80)
-attack2 = engine.load_spritesheet('assets/sprites/MyCharacter/attack2.png', 120, 80)
-turn = engine.load_spritesheet('assets/sprites/MyCharacter/turn.png', 120, 80)
-wallslide = engine.load_spritesheet('assets/sprites/MyCharacter/wallslide.png', 120, 80)
 
-Dummy_idle = engine.load_spritesheet('assets/sprites/Test_dummy/idle.png', 32, 32)
-Dummy_hit = engine.load_spritesheet('assets/sprites/Test_dummy/hit.png', 32, 32)
 
-coin_images = engine.load_spritesheet('assets/sprites/coin.png', 8, 8)
-dash_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dash.png', 48, 32)
-dust_landing_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dust_landing.png', 32, 16)
-tileset = engine.load_spritesheet('assets/tilesets/tileset.png', 16, 16)
+
 
 def instantiate(entity_name, x, y, mirror):
     if entity_name == 'dash':
@@ -52,6 +37,7 @@ def instantiate(entity_name, x, y, mirror):
         else:
             entity.transform = engine.Transform(x - 192, y - 128, 192, 128, mirror)
         entity.animations = engine.Animations()
+        dash_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dash.png', 48, 32)
         entity.animations.add('idle', engine.Animation(dash_images[0:8], 10))
         entity.destruct = True
         entity.destruct_timer = 0.8
@@ -62,6 +48,16 @@ def instantiate(entity_name, x, y, mirror):
         entity.transform = engine.Transform(x, y, 480, 320, mirror)
         entity.collider = engine.Transform(x, y, 95, 150, mirror)
         entity.animations = engine.Animations()
+        run = engine.load_spritesheet('assets/sprites/MyCharacter/run.png', 120, 80)
+        idle = engine.load_spritesheet('assets/sprites/MyCharacter/idle.png', 120, 80)
+        jump = engine.load_spritesheet('assets/sprites/MyCharacter/jump.png', 120, 80)
+        apex = engine.load_spritesheet('assets/sprites/MyCharacter/apex.png', 120, 80)
+        fall = engine.load_spritesheet('assets/sprites/MyCharacter/fall.png', 120, 80)
+        dash = engine.load_spritesheet('assets/sprites/MyCharacter/dash.png', 120, 80)
+        attack = engine.load_spritesheet('assets/sprites/MyCharacter/attack.png', 120, 80)
+        attack2 = engine.load_spritesheet('assets/sprites/MyCharacter/attack2.png', 120, 80)
+        turn = engine.load_spritesheet('assets/sprites/MyCharacter/turn.png', 120, 80)
+        wallslide = engine.load_spritesheet('assets/sprites/MyCharacter/wallslide.png', 120, 80)
         entity.animations.add('idle', engine.Animation(idle, 7))
         entity.animations.add('run', engine.Animation(run, 14)) #12
         entity.animations.add('jump', engine.Animation(jump, 7))
@@ -84,6 +80,7 @@ def instantiate(entity_name, x, y, mirror):
         entity.transform = engine.Transform(x, y, 32, 32, mirror)
         entity.collider = engine.Transform(x, y, 32, 32, mirror)
         entity.animations = engine.Animations()
+        coin_images = engine.load_spritesheet('assets/sprites/coin.png', 8, 8)
         entity.animations.add('idle', engine.Animation(coin_images, 14))
         entity.controller = Coin(entity)
         entity.type = 'collectable'
@@ -96,6 +93,7 @@ def instantiate(entity_name, x, y, mirror):
         else:
             entity.transform = engine.Transform(x - 80, y - 64, 128, 64, mirror)
         entity.animations = engine.Animations()
+        dust_landing_images = engine.load_spritesheet('assets/sprites/smoke_effects/Dust_landing.png', 32, 16)
         entity.animations.add('idle', engine.Animation(dust_landing_images[0:8], 10))
         entity.destruct = True
         entity.destruct_timer = 0.8
@@ -110,6 +108,8 @@ def make_dummy(x, y, flip):
     else:
         entity.collider = engine.Transform(x, y, 64, 128, flip)
     entity.animations = engine.Animations()
+    Dummy_idle = engine.load_spritesheet('assets/sprites/Test_dummy/idle.png', 32, 32)
+    Dummy_hit = engine.load_spritesheet('assets/sprites/Test_dummy/hit.png', 32, 32)
     entity.animations.add('idle', engine.Animation(Dummy_idle, 10))
     entity.animations.add('hit', engine.Animation(Dummy_hit, 10))
     entity.controller = Dummy(entity)
