@@ -38,7 +38,7 @@ class CameraSystem(System):
             if DEBUG:
                 if e.collider != None:
                     collider = e.collider.get_rect()
-                    pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom) // 4, int(collider.y / entity.camera.zoom) // 4, int(collider.width / entity.camera.zoom) // 4, int(collider.height / entity.camera.zoom) // 4))
+                    pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + self.offset.x), int(collider.y / entity.camera.zoom + self.offset.y), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
 
         #TODO - Fix gui, Reason: I made the preformance better by drawing individual pixels instead of 4 pixels per pixel
         #if entity.gui != None:
@@ -48,8 +48,8 @@ class CameraSystem(System):
     
     def draw_entity(self, e, surface, entity):
         if e.transform != None:
-            entity_pos = (e.transform.pos / entity.camera.zoom) / 4
-            entity_size = (e.transform.size / entity.camera.zoom) // 4
+            entity_pos = (e.transform.pos / entity.camera.zoom + self.offset)
+            entity_size = (e.transform.size / entity.camera.zoom)
         if e.animations != None:
             if e.controller == None:
                 e.animations.animations_list[e.state].draw(surface, entity_pos, entity_size, e.transform.mirrored, False)

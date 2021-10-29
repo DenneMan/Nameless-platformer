@@ -85,11 +85,11 @@ class Game():
             
             self.canvas.fill((0, 0, 0))
 
-            if DEBUG: draw_timer.start()
             self.camera_sys.update(self.canvas)
-            if DEBUG: draw_timer.stop()
             
-            self.display.blit(pygame.transform.scale(self.canvas, (SCREEN_W * 4, SCREEN_H * 4)), self.camera_sys.offset)
+            if DEBUG: draw_timer.start()
+            self.display.blit(self.canvas, (0, 0))
+            if DEBUG: draw_timer.stop()
             pygame.display.flip()
             self.reset_keys()
             if DEBUG: full_timer.stop()
