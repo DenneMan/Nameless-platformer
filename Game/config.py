@@ -19,4 +19,4 @@ LEFT = 0
 STOP = 1
 RIGHT = 2
 
-DEBUG = True
+DEBUG = False

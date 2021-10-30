@@ -4,7 +4,6 @@ import helper
 from datetime import datetime
 from world import World
 from config import *
-import game
 
 class Menu():
     def __init__(self, game):
@@ -122,7 +121,6 @@ def Main():
         
         if button.collidepoint(released_pos):
             print('clicked')
-            game.Main()
 
         canvas.fill((39, 39, 54))
 
@@ -133,20 +131,11 @@ def Main():
         pygame.display.update()
 
 class Button():
-    def __init__(self, rect, color=None, highlight_color=None, image=None, highlight_image=None):
+    def __init__(self, rect, image=None, highlight_image=None):
         self.rect = rect
-        if image != None and highlight_image != None:
-            self.default_image = image
-            self.highlight_image = highlight_image
-            self.image = self.default_image
-        elif color != None and highlight_color != None:
-            self.default_image = pygame.Surface((rect.w, rect.h))
-            self.default_image.fill(color)
-            self.highlight_image = pygame.Surface((rect.w, rect.h))
-            self.highlight_image.fill(highlight_color)
-            self.image = self.default_image
-        else:
-            print('Error in <class: Button> because of insufficient arguments')
+        self.default_image = image
+        self.highlight_image = highlight_image
+        self.image = self.default_image
     
     def handle_highlight(self, mouse_pos):
         if self.rect.collidepoint(mouse_pos):
@@ -154,8 +143,8 @@ class Button():
         else:
             self.image = self.default_image
 
-    def handle_pressing(self, mouse_pos):
-        ...
+    def collide(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)

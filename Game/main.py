@@ -1,9 +1,16 @@
-from game import Game
-import menu
+import pygame, os
+import engine, scene
+from config import *
 
-g = Game()
+os.environ['SDL_VIDEO_WINDOW_POS'] = f"{0},{0}"
+display = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 
-while g.running:
-    g.current_menu.display()
-    #g.playing = True
-    g.game_loop()
+sm = scene.SceneManager()
+sm.push(scene.MainMenu())
+running = True
+while running:
+    running = not sm.isEmpty()
+    sm.input()
+    sm.update(engine.deltaTime())
+    sm.draw(display)
+    pygame.display.flip()

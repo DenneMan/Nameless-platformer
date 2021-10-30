@@ -59,7 +59,7 @@ def instantiate(entity_name, x, y, mirror):
         turn = engine.load_spritesheet('assets/sprites/MyCharacter/turn.png', 120, 80)
         wallslide = engine.load_spritesheet('assets/sprites/MyCharacter/wallslide.png', 120, 80)
         entity.animations.add('idle', engine.Animation(idle, 7))
-        entity.animations.add('run', engine.Animation(run, 14)) #12
+        entity.animations.add('run', engine.Animation(run, 14))
         entity.animations.add('jump', engine.Animation(jump, 7))
         entity.animations.add('apex', engine.Animation(apex, 7))
         entity.animations.add('fall', engine.Animation(fall, 7))

@@ -192,6 +192,7 @@ class Player():
             self.vel.x = self.jump_force
         elif direction == LEFT:
             self.vel.x = -self.jump_force
+        self.transform.mirrored = not self.transform.mirrored
 
 
     def vertical_collision(self):
@@ -279,7 +280,6 @@ class Player():
                 if self.animations.state == 'idle' or self.animations.state == 'fall' or self.animations.state == 'wallslide':
                     self.animations.force_skip()
         else:
-            
             if self.wallslide_right:
                 self.transform.mirrored = True
                 self.animations.next('wallslide')
@@ -299,3 +299,7 @@ class Player():
                 self.animations.next('fall')
                 if self.animations.state == 'run' or self.animations.state == 'idle' or self.animations.state == 'wallslide':
                     self.animations.force_skip()
+            if self.vel.x > 0:
+                self.transform.mirrored = False
+            if self.vel.x < 0:
+                self.transform.mirrored = True
