@@ -111,18 +111,18 @@ class Animations():
 # Class to handle animations
 class Animation():
 
-    def __init__(self, images, animations_per_second):
+    def __init__(self, images, fps):
         self.images = images
         self.image_index = 0
         self.animation_timer = 0
-        self.animations_per_second = animations_per_second
+        self.fps = fps
 
 
     def update(self, dt):
         # Increment animation_timer by the time between frames
         self.animation_timer += dt
 
-        if self.animation_timer >= 1 / self.animations_per_second:
+        if self.animation_timer >= 1 / self.fps:
             self.image_index += 1
             self.animation_timer = 0
             if self.image_index >= len(self.images):
@@ -135,8 +135,8 @@ class Animation():
         self.image_index = index
 
     
-    def set_animations_per_second(self, animations_per_second):
-        self.animations_per_second = animations_per_second
+    def set_fps(self, fps):
+        self.fps = fps
 
 
     def draw(self, surface, pos, size, flip_x, flip_y):

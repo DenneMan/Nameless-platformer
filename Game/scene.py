@@ -77,8 +77,6 @@ class MainMenu(Scene):
 
 class Game(Scene):
     def __init__(self):
-        self.onEnter()
-    def onEnter(self):
         engine.entities = []
         self.camera_sys = engine.CameraSystem()
         self.playing, self.running = False, True
@@ -86,10 +84,6 @@ class Game(Scene):
         self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP = False, False, False, False, False, False, False, False, False, False, False, False
 
         self.player = helper.instantiate('player', SCREEN_W / 2, 400, False)
-        self.player.gui = engine.GUI(self.player.camera)
-        coins_text = engine.Text(pygame.font.Font('assets\\fonts\\EquipmentPro.ttf', 50), '0', (245, 217, 76), (50, 2), 'topleft')
-        self.player.gui.add_text(coins_text)
-        self.player.gui.add_text(helper.combo_text)
 
         dummy = helper.make_dummy(SCREEN_W / 2, SCREEN_H / 2, False)
 

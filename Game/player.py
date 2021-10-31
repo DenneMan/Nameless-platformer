@@ -2,6 +2,7 @@ import pygame
 import engine
 import helper
 from config import *
+import math
 
 #################################################
 #  Main player class, used for the player only  #
@@ -277,6 +278,8 @@ class Player():
                     self.animations.force_skip()
             else:
                 self.animations.next('run')
+                print(abs(self.vel.x) / 25 + 4)
+                self.animations.animations_list['run'].set_fps(abs(self.vel.x) / 25 + 4)
                 if self.animations.state == 'idle' or self.animations.state == 'fall' or self.animations.state == 'wallslide':
                     self.animations.force_skip()
         else:
@@ -284,22 +287,25 @@ class Player():
                 self.transform.mirrored = True
                 self.animations.next('wallslide')
                 self.animations.force_skip()
-            if self.wallslide_left:
+            elif self.wallslide_left:
                 self.transform.mirrored = False
                 self.animations.next('wallslide')
                 self.animations.force_skip()
+            else:
             # PARTS OF JUMP
-            if -200 < self.vel.y < 200:
-                self.animations.next('apex')
-            elif self.vel.y < 0:
-                self.animations.next('jump')
-                if self.animations.state == 'run' or self.animations.state == 'idle' or self.animations.state == 'wallslide':
-                    self.animations.force_skip()
-            elif self.vel.y > 0:
-                self.animations.next('fall')
-                if self.animations.state == 'run' or self.animations.state == 'idle' or self.animations.state == 'wallslide':
-                    self.animations.force_skip()
-            if self.vel.x > 0:
-                self.transform.mirrored = False
-            if self.vel.x < 0:
-                self.transform.mirrored = True
+                if -200 < self.vel.y < 200:
+                    self.animations.next('apex')
+                    if self.animations.state == 'run' or self.animations.state == 'idle' or self.animations.state == 'wallslide' or self.animations.state == 'jump':
+                        self.animations.force_skip()
+                elif self.vel.y < 0:
+                    self.animations.next('jump')
+                    if self.animations.state == 'run' or self.animations.state == 'idle' or self.animations.state == 'wallslide':
+                        self.animations.force_skip()
+                elif self.vel.y > 0:
+                    self.animations.next('fall')
+                    if self.animations.state == 'run' or self.animations.state == 'idle' or self.animations.state == 'wallslide' or self.animations.state == 'jump':
+                        self.animations.force_skip()
+                if self.vel.x > 0:
+                    self.transform.mirrored = False
+                if self.vel.x < 0:
+                    self.transform.mirrored = True
