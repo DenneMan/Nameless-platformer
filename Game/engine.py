@@ -27,8 +27,8 @@ class CameraSystem(System):
         surface.fill((39, 39, 54))
 
         if entity.camera.tracked_entity != None:
-            entity.camera.world_x += ((entity.camera.tracked_entity.transform.pos.x + entity.camera.tracked_entity.transform.size.x / 2 - entity.camera.world_x) / LERP_SPEED[0]) / entity.camera.zoom
-            entity.camera.world_y += ((entity.camera.tracked_entity.transform.pos.y + entity.camera.tracked_entity.transform.size.y / 2 - entity.camera.world_y) / LERP_SPEED[1]) / entity.camera.zoom
+            entity.camera.world_x += ((entity.camera.tracked_entity.transform.l + entity.camera.tracked_entity.transform.w / 2 - entity.camera.world_x) / LERP_SPEED[0]) / entity.camera.zoom
+            entity.camera.world_y += ((entity.camera.tracked_entity.transform.t + entity.camera.tracked_entity.transform.h / 2 - entity.camera.world_y) / LERP_SPEED[1]) / entity.camera.zoom
 
         self.offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
 
@@ -48,8 +48,8 @@ class CameraSystem(System):
     
     def draw_entity(self, e, surface, entity):
         if e.transform != None:
-            entity_pos = (e.transform.pos / entity.camera.zoom + self.offset)
-            entity_size = (e.transform.size / entity.camera.zoom)
+            entity_pos = (e.transform.l / entity.camera.zoom + self.offset.x, e.transform.t / entity.camera.zoom + self.offset.y)
+            entity_size = (e.transform.w / entity.camera.zoom, e.transform.h / entity.camera.zoom)
         if e.animations != None:
             if e.controller == None:
                 e.animations.animations_list[e.state].draw(surface, entity_pos, entity_size, e.transform.mirrored, False)
@@ -68,12 +68,40 @@ class CameraSystem(System):
 ################
 
 class Transform():
-    def __init__(self, x, y, width, height, mirrored):
-        self.pos = pygame.math.Vector2(x, y)
-        self.size = pygame.math.Vector2(width, height)
+    def __init__(self, x, y, w, h, mirrored):
+        self.t = y
+        self.b = y + h
+        self.l = x
+        self.r = x + w
+        self.old_t = y
+        self.old_b = y + h
+        self.old_l = x
+        self.old_r = x + w
+
+        self.w = w
+        self.h = h
+
         self.mirrored = mirrored
-    def get_rect(self):
-        return pygame.Rect(self.pos.x, self.pos.y, self.size.x, self.size.y)
+    def set_top(self, t):
+        self.old_t = self.t
+        self.old_b = self.b
+        self.t = t
+        self.b = t + self.h
+    def set_bottom(self, b):
+        self.old_b = self.b
+        self.old_t = self.t
+        self.b = b
+        self.t = b - self.h
+    def set_left(self, l):
+        self.old_l = self.l
+        self.old_r = self.r
+        self.l = l
+        self.r = l + self.w
+    def set_right(self, r):
+        self.old_r = self.r
+        self.old_l = self.l
+        self.r = r
+        self.l = r - self.w
 
 class Camera():
     def __init__(self, x, y, width, height):
@@ -140,9 +168,9 @@ class Animation():
 
 
     def draw(self, surface, pos, size, flip_x, flip_y):
-        scaled_image = pygame.transform.scale(self.images[self.image_index], (int(size.x), int(size.y)))
+        scaled_image = pygame.transform.scale(self.images[self.image_index], (int(size[0]), int(size[1])))
         flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
-        surface.blit(flipped_image, (int(pos.x), int(pos.y)))
+        surface.blit(flipped_image, (int(pos[0]), int(pos[1])))
 
 ###############
 #  Functions  #
@@ -277,9 +305,9 @@ class Sprite():
     def __init__(self, image):
         self.image = image
     def draw(self, surface, pos, size, flip_x, flip_y):
-        scaled_image = pygame.transform.scale(self.image, (int(size.x), int(size.y)))
+        scaled_image = pygame.transform.scale(self.image, (int(size[0]), int(size[1])))
         flipped_image = pygame.transform.flip(scaled_image, flip_x, flip_y)
-        surface.blit(flipped_image, (int(pos.x), int(pos.y)))
+        surface.blit(flipped_image, (int(pos[0]), int(pos[1])))
 
 class Entity():
     def __init__(self):

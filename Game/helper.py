@@ -45,7 +45,7 @@ def instantiate(entity_name, x, y, mirror):
     elif entity_name == 'player':
         entity = engine.Entity()
         entity.name = 'player'
-        entity.transform = engine.Transform(x, y, 480, 320, mirror)
+        entity.transform = engine.Transform(0, 0, 480, 320, mirror)
         entity.collider = engine.Transform(x, y, 95, 150, mirror)
         entity.animations = engine.Animations()
         run = engine.load_spritesheet('assets/sprites/MyCharacter/run.png', 120, 80)
@@ -69,9 +69,8 @@ def instantiate(entity_name, x, y, mirror):
         entity.animations.add('turn', engine.Animation(turn, 14))
         entity.animations.add('wallslide', engine.Animation(wallslide, 14))
         entity.controller = Player(entity)
-        entity.score = 0
         entity.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
-        entity.camera.set_world_pos(entity.transform.pos.x, entity.transform.pos.y)
+        entity.camera.set_world_pos(x, y)
         entity.camera.track_entity(entity)
         return entity
     elif entity_name == 'coin':

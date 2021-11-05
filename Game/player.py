@@ -10,21 +10,20 @@ import math
 class Player():
 
     def __init__(self, _self):
+        ##################################
         self.transform = _self.transform
         self.collider = _self.collider
-        self.collider.pos.x = self.transform.pos.x + self.transform.size.x - self.collider.pos.x
-        self.collider.pos.y = self.transform.pos.y + self.transform.size.y - self.collider.pos.y
+        self.transform.set_left(self.collider.l - ((self.transform.w - self.collider.w) / 2))
+        self.transform.set_bottom(self.collider.b)
+
         self.animations = _self.animations
         self.animations.next('idle')
-        self.difference = pygame.math.Vector2((self.transform.size.x - self.collider.size.x) / 2, self.transform.size.y - self.collider.size.y)
-
-        self.rect = self.collider.get_rect()
 
         self.vel = pygame.math.Vector2(0, 0)
 
         self.acceleration = 1000
         self.friction = 6.4
-        self.max_speed = 350
+        self.max_speed = 400
         self.terminal_velocity = 1500
         self.direction = STOP
 
@@ -48,7 +47,8 @@ class Player():
         self.last_attack = None
         self.grounded_list = []
 
-        self.collide_wall = False
+        self.collide_right = False
+        self.collide_left = False
         self.wallslide_right = False
         self.wallslide_left = False
 
@@ -56,9 +56,6 @@ class Player():
         self.attack_timer = 0.5
 
     def update(self, dt):
-        self.collider.pos.x = self.transform.pos.x + self.transform.size.x / 2 - self.collider.size.x / 2
-        self.collider.pos.y = (self.transform.pos.y + self.transform.size.y) - self.collider.size.y
-
         if self.is_attacking:
             self.attack_timer -= dt
             if self.attack_timer <= 0:
@@ -83,24 +80,23 @@ class Player():
                 self.animations.next('turn')
                 self.animations.force_skip()
 
+
+        self.horizontal_movement(dt)
+        self.vertical_movement(dt)
+
+        self.collider.set_top(self.collider.t + self.vel.y * dt)
+        self.collider.set_left(self.collider.l + self.vel.x * dt)
+
+        self.transform.set_left(self.collider.l - ((self.transform.w - self.collider.w) / 2))
+        self.transform.set_bottom(self.collider.b)
+
         if self.is_grounded:
             last_grounded = True
         else:
             last_grounded = False
-
-        self.horizontal_movement(dt)
-        self.rect.x = self.collider.pos.x + self.vel.x * dt
-        self.horizontal_collision()
-        self.rect.x = self.collider.pos.x
-        self.vertical_movement(dt)
-        self.rect.y = self.collider.pos.y + self.vel.y * dt
-        self.vertical_collision()
-        self.rect.y = self.collider.pos.y
-
+        self.collision()
         if last_grounded == False and self.is_grounded == True:
-            engine.entities.append(helper.instantiate('dust_landing', self.rect.center[0], self.rect.bottom, self.transform.mirrored))
-
-        self.transform.pos += self.vel * dt
+            engine.entities.append(helper.instantiate('dust_landing', self.collider.l + self.collider.w / 2, self.collider.b, self.transform.mirrored))
 
         self.set_state()
 
@@ -137,30 +133,6 @@ class Player():
             self.animations.force_skip()
             self.dash_timer = self.dash_delay
 
-    def horizontal_collision(self):
-        self.collide_wall = False
-        for entity in engine.entities:
-            if entity.children != None:
-                for child in entity.children:
-                    if type(entity.children) == dict:
-                        child = entity.children[child]
-                    self._horizontal_collision(child)
-            else:
-                self._horizontal_collision(entity)
-    def _horizontal_collision(self, entity):
-        if entity.static_collision:
-            collider = entity.transform.get_rect()
-            if self.rect.bottom > collider.top and self.rect.top < collider.bottom:
-                if self.rect.right >= collider.left and self.rect.left <= collider.right:
-                    self.vel.x = 0
-                    self.collide_wall = True
-
-                    if self.collider.pos.x < collider.left:
-                        self.transform.pos.x = collider.left - self.transform.size.x + self.difference.x
-                    else:
-                        self.transform.pos.x = collider.right - self.difference.x + 1
-
-
     def vertical_movement(self, dt):
         if self.is_jumping:
             if self.is_grounded:
@@ -173,10 +145,10 @@ class Player():
 
         self.wallslide_right = False
         self.wallslide_left = False
-        if self.collide_wall and self.is_grounded == False and self.direction == RIGHT:
+        if self.collide_right and self.is_grounded == False and self.direction == RIGHT:
             self.vel.y = GRAVITY / 10
             self.wallslide_right = True
-        elif self.collide_wall and self.is_grounded == False and self.direction == LEFT:
+        elif self.collide_left and self.is_grounded == False and self.direction == LEFT:
             self.vel.y = GRAVITY / 10
             self.wallslide_left = True
         else:
@@ -196,30 +168,44 @@ class Player():
         self.transform.mirrored = not self.transform.mirrored
 
 
-    def vertical_collision(self):
+    ##################################
+    def collision(self):
         self.is_grounded = False
+        self.collide_left = False
+        self.collide_right = False
         for entity in engine.entities:
             if entity.children != None:
                 for child in entity.children:
                     if type(entity.children) == dict:
                         child = entity.children[child]
-                    self._vertical_collision(child)
+                    self._collision(child)
             else:
-                self._vertical_collision(entity)
-    def _vertical_collision(self, entity):
+                self._collision(entity)
+    def _collision(self, entity):
         if entity.static_collision:
-            collider = entity.transform.get_rect()
-            if self.rect.right > collider.left and self.rect.left < collider.right:
-                if self.rect.bottom >= collider.top and self.rect.top <= collider.bottom:
-                    self.vel.y = 0
-                    if self.collider.pos.y < collider.top:
-                        self.is_grounded = True
+            rect = entity.transform
+            if self.collider.b < rect.t or self.collider.t > rect.b or self.collider.l > rect.r or self.collider.r < rect.l: 
+                return
 
-                        # fix wierd bug caused by gravity being constant
-                        self.transform.pos.y = collider.top - self.transform.size.y
-                    else:
-                        # fix wierd bug caused by gravity being constant
-                        self.transform.pos.y = collider.bottom - self.difference.y + 1
+            
+            if self.collider.b >= rect.t and self.collider.old_b < rect.old_t:
+                self.vel.y = 0
+                self.collider.set_bottom(rect.t - 0.000001)
+                self.is_grounded = True
+
+            elif self.collider.t <= rect.b and self.collider.old_t > rect.old_b:
+                self.vel.y = 0
+                self.collider.set_top(rect.b + 0.000001)
+
+            elif self.collider.r >= rect.l and self.collider.old_r < rect.old_l:
+                self.vel.x = 0
+                self.collider.set_right(rect.l - 0.000001)
+                self.collide_right = True
+
+            elif self.collider.l <= rect.r and self.collider.old_l > rect.old_r:
+                self.vel.x = 0
+                self.collider.set_left(rect.r + 0.000001)
+                self.collide_left = True
 
 
     def attack(self):
@@ -278,8 +264,7 @@ class Player():
                     self.animations.force_skip()
             else:
                 self.animations.next('run')
-                print(abs(self.vel.x) / 25 + 4)
-                self.animations.animations_list['run'].set_fps(abs(self.vel.x) / 25 + 4)
+                self.animations.animations_list['run'].set_fps(abs(self.vel.x) / 35 + 4)
                 if self.animations.state == 'idle' or self.animations.state == 'fall' or self.animations.state == 'wallslide':
                     self.animations.force_skip()
         else:

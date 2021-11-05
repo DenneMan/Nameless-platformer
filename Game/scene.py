@@ -85,7 +85,7 @@ class Game(Scene):
 
         self.player = helper.instantiate('player', SCREEN_W / 2, 400, False)
 
-        dummy = helper.make_dummy(SCREEN_W / 2, SCREEN_H / 2, False)
+        #dummy = helper.make_dummy(SCREEN_W / 2, SCREEN_H / 2, False)
 
         self.camera_sys = engine.CameraSystem()
 
@@ -93,7 +93,7 @@ class Game(Scene):
         self.bg_tileset = engine.load_spritesheet('assets\\tilesets\\background\\background.png', 32, 32)
         World(self.wall_tileset, self.bg_tileset, 'assets\\tilesets\\walls\\Map.json')
 
-        engine.entities.append(dummy)
+        #engine.entities.append(dummy)
         engine.entities.append(self.player)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
@@ -105,10 +105,10 @@ class Game(Scene):
         if self.M1:
             self.player.controller.attack()
         if self.SCR_DOWN:
-            self.player.camera.zoom -= self.dt * 6
+            self.player.camera.zoom -= 0.05
             self.player.camera.zoom = max(self.player.camera.zoom, 0.5)
         if self.SCR_UP:
-            self.player.camera.zoom += self.dt * 6
+            self.player.camera.zoom += 0.05
             self.player.camera.zoom = min(self.player.camera.zoom, 2)
         if self.BACK:
             self.playing = False
@@ -122,26 +122,6 @@ class Game(Scene):
         if self.DASH:
             self.player.controller.is_dashing = True
     def update(self, sm, dt):
-        if self.M1:
-            self.player.controller.attack()
-        if self.SCR_DOWN:
-            self.player.camera.zoom -= self.dt * 6
-            self.player.camera.zoom = max(self.player.camera.zoom, 0.5)
-        if self.SCR_UP:
-            self.player.camera.zoom += self.dt * 6
-            self.player.camera.zoom = min(self.player.camera.zoom, 2)
-        if self.BACK:
-            self.playing = False
-        if self.JUMP:
-            self.player.controller.is_jumping = True
-        self.player.controller.direction = STOP
-        if self.LEFT and not self.RIGHT:
-            self.player.controller.direction = LEFT
-        if self.RIGHT and not self.LEFT:
-            self.player.controller.direction = RIGHT
-        if self.DASH:
-            self.player.controller.is_dashing = True
-
         engine.update(dt, self.player)
     def draw(self, sm, surface):
         self.camera_sys.update(surface)
