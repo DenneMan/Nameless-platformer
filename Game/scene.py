@@ -137,7 +137,8 @@ class Transition(Scene):
         self.toScene = toScene
         self.length = length
     def update(self, sm, dt):
-        self.fromScene.update(sm, dt)
+        if self.fromScene is not None:
+            self.fromScene.update(sm, dt)
         if len(sm.scenes) > 1:
             if self.toScene is None:
                 sm.scenes[-2].update(sm, dt)
@@ -152,7 +153,8 @@ class Transition(Scene):
 class Fade(Transition):
     def draw(self, sm, surface):
         if self.percentage < 50:
-            self.fromScene.draw(sm, surface)
+            if self.fromScene is not None:
+                self.fromScene.draw(sm, surface)
         else:
             if len(sm.scenes) > 1:
                 if self.toScene is None:

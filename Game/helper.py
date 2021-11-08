@@ -3,7 +3,6 @@ from config import *
 from player import Player
 from dummy import Dummy
 from coin import Coin
-from creative import CreativePlayer
 import pygame
 
 combo_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (500, 2), 'topleft')
@@ -118,12 +117,3 @@ def make_dummy(x, y, flip):
 def spawn_coins(x, y, amount):
     for i in range(amount):
         engine.entities.append(instantiate('coin', x - 16, y - 16, False))
-
-def make_moveable_empty(x, y):
-    player = engine.Entity()
-    player.transform = engine.Transform(x, y, 1, 1, False)
-    player.controller = CreativePlayer(player)
-    player.camera = engine.Camera(0, 0, SCREEN_W, SCREEN_H)
-    player.camera.set_world_pos(player.transform.pos.x, player.transform.pos.y)
-    player.camera.track_entity(player)
-    return player

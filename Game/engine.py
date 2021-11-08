@@ -136,7 +136,6 @@ class Animations():
         if self.animations_list[self.state].update(dt):
             self.state = self.next_state
 
-# Class to handle animations
 class Animation():
 
     def __init__(self, images, fps):
