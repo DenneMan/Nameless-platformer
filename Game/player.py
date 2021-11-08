@@ -10,7 +10,6 @@ import math
 class Player():
 
     def __init__(self, _self):
-        ##################################
         self.transform = _self.transform
         self.collider = _self.collider
         self.transform.set_left(self.collider.l - ((self.transform.w - self.collider.w) / 2))
@@ -167,8 +166,6 @@ class Player():
             self.vel.x = -self.jump_force
         self.transform.mirrored = not self.transform.mirrored
 
-
-    ##################################
     def collision(self):
         self.is_grounded = False
         self.collide_left = False
@@ -190,21 +187,21 @@ class Player():
             
             if self.collider.b >= rect.t and self.collider.old_b < rect.old_t:
                 self.vel.y = 0
-                self.collider.set_bottom(rect.t - 0.000001)
+                self.collider.set_bottom(rect.t - C_THRESHOLD)
                 self.is_grounded = True
 
             elif self.collider.t <= rect.b and self.collider.old_t > rect.old_b:
                 self.vel.y = 0
-                self.collider.set_top(rect.b + 0.000001)
+                self.collider.set_top(rect.b + C_THRESHOLD)
 
             elif self.collider.r >= rect.l and self.collider.old_r < rect.old_l:
                 self.vel.x = 0
-                self.collider.set_right(rect.l - 0.000001)
+                self.collider.set_right(rect.l - C_THRESHOLD)
                 self.collide_right = True
 
             elif self.collider.l <= rect.r and self.collider.old_l > rect.old_r:
                 self.vel.x = 0
-                self.collider.set_left(rect.r + 0.000001)
+                self.collider.set_left(rect.r + C_THRESHOLD)
                 self.collide_left = True
 
 
@@ -213,7 +210,7 @@ class Player():
         self.direction = STOP
 
     def attack_check(self, type):
-        rect = self.transform.get_rect()
+        rect = pygame.Rect(self.transform.l, self.transform.t, self.transform.w, self.transform.h)
         if self.transform.mirrored:
             if type == 1:
                 attack_rect = pygame.Rect(rect.x + 10, rect.y + rect.height / 2, rect.width / 4, rect.height / 2)
@@ -232,7 +229,8 @@ class Player():
 
         for entity in engine.entities:
             if entity.type == 'enemy':
-                if attack_rect.colliderect(entity.collider.get_rect()):
+                c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
+                if attack_rect.colliderect(c):
                     entity.controller.hit()
 
 

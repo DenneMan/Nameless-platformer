@@ -210,7 +210,22 @@ def deltaTime():
 #  Object types  #
 ##################
 
-# Sophisticated text creator that has way more features than basic pygame text
+class Button():
+    def __init__(self, text, defualt_color, highlight_color):
+        self.text = text
+        self.rect = self.text.rect
+        self.default_color = defualt_color
+        self.highlight_color = highlight_color
+    def collide(self, point):
+        return self.rect.collidepoint(point)
+    def highlight(self, point):
+        if self.collide(point):
+            self.text.set_color(self.highlight_color)
+        else:
+            self.text.set_color(self.default_color)
+    def draw(self, surface):
+        self.text.draw(surface)
+
 class Text(pygame.sprite.Sprite):
 
     def __init__(self, font, text, color, position, anchor):
@@ -339,9 +354,8 @@ def update(dt, player):
             entity.animations.update(dt)
 
         if entity.type == 'collectable':
-            if player.collider.get_rect().colliderect(entity.transform.get_rect()):
+            if sum(collide_rects(player.collider, entity.transform)):
                 entities.remove(entity)
-                player.score += 1
 
         if entity.destruct:
             entity.destruct_timer -= dt
@@ -350,3 +364,19 @@ def update(dt, player):
 
         if entity.controller != None:
             entity.controller.update(dt)
+
+def collide_rects(this, other):
+    cu, cd, cl, cr = False, False, False, False
+
+    if this.b < other.t or this.t > other.b or this.l > other.r or this.r < other.l: 
+        pass
+    elif this.t <= other.b and this.old_t > other.old_b:
+        cu = True
+    elif this.b >= other.t and this.old_b < other.old_t:
+        cd = True
+    elif this.l <= other.r and this.old_l > other.old_r:
+        cl = True
+    elif this.r >= other.l and this.old_r < other.old_l:
+        cr = True
+
+    return [cu, cd, cl, cr]

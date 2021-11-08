@@ -1,4 +1,4 @@
-import pygame, os, math
+import pygame, math
 from config import *
 from datetime import datetime
 import engine
@@ -57,13 +57,16 @@ class MainMenu(Scene):
             [pygame.transform.scale(pygame.image.load(directory + cycle + '\\back.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
             [pygame.transform.scale(pygame.image.load(directory + cycle + '\\mid.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
             [pygame.transform.scale(pygame.image.load(directory + cycle + '\\front.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)]]
+        self.start_button = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", 80), "Play", (255, 255, 255), (SCREEN_W/2, SCREEN_H/2), "center"), (100, 100, 100), (200, 200, 200))
     def input(self, sm):
         super().input(sm)
-        if self.M1:
-            sm.push(Fade(self, Game(), 0.5))
         if self.BACK:
             sm.pop()
             sm.push(Fade(self, None, 0.5))
+        if self.start_button.collide(pygame.mouse.get_pos()):
+            if self.M1:
+                sm.push(Fade(self, Game(), 0.5))
+        self.start_button.highlight(pygame.mouse.get_pos())
     def update(self, sm, dt):
         for i, image in enumerate(self.background):
             image[1].x -= dt * i * 20 + dt * 10
@@ -73,6 +76,7 @@ class MainMenu(Scene):
         for image in self.background:
             surface.blit(image[0], (image[1].x, 0))
             surface.blit(image[0], (image[1].x + SCREEN_W, 0))
+        self.start_button.draw(surface)
 
 
 class Game(Scene):
@@ -85,7 +89,7 @@ class Game(Scene):
 
         self.player = helper.instantiate('player', SCREEN_W / 2, 400, False)
 
-        #dummy = helper.make_dummy(SCREEN_W / 2, SCREEN_H / 2, False)
+        dummy = helper.make_dummy(SCREEN_W / 2, SCREEN_H / 2, False)
 
         self.camera_sys = engine.CameraSystem()
 
@@ -93,7 +97,7 @@ class Game(Scene):
         self.bg_tileset = engine.load_spritesheet('assets\\tilesets\\background\\background.png', 32, 32)
         World(self.wall_tileset, self.bg_tileset, 'assets\\tilesets\\walls\\Map.json')
 
-        #engine.entities.append(dummy)
+        engine.entities.append(dummy)
         engine.entities.append(self.player)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)

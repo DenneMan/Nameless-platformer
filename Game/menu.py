@@ -43,6 +43,8 @@ class Loading(Menu):
         self.title_pos_y = -self.title.get_height()
         stage_two = False
 
+        
+
         self.displaying = True
         while self.displaying:
             self.dt = engine.deltaTime()
