@@ -3,26 +3,6 @@ import engine
 import json
 from config import *
 
-#def load_level():
-#    tiles = {}
-#    for y, list in enumerate(level):
-#        for x, version in enumerate(list):
-#            if version != -1:
-#                pos = (x, y)
-#                tiles[str(pos)] = make_tile(x, y, version)
-#    world = engine.Entity()
-#    world.name = 'world'
-#    world.children = tiles
-#    engine.entities.append(world)
-#
-#    
-#def make_tile(x, y, index):
-#    tile = engine.Entity()
-#    tile.transform = engine.Transform(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, False)
-#    tile.sprite = engine.Sprite(tileset[index])
-#    tile.static_collision = True
-#    return tile
-
 class World():
     def __init__(self, wall_tileset, bg_tileset, level):
         self.wall_tileset = wall_tileset

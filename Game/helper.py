@@ -3,29 +3,10 @@ from config import *
 from player import Player
 from dummy import Dummy
 from coin import Coin
+from basic_enemy_AI import Enemy
 import pygame
 
 combo_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (500, 2), 'topleft')
-
-#Run = engine.load_spritesheet('assets/sprites/player/_Run.png', 120, 80)
-#Idle = engine.load_spritesheet('assets/sprites/player/_Idle.png', 120, 80)
-#Jump = engine.load_spritesheet('assets/sprites/player/_Jump.png', 120, 80)
-#Apex = engine.load_spritesheet('assets/sprites/player/_JumpFallInbetween.png', 120, 80)
-#Fall = engine.load_spritesheet('assets/sprites/player/_Fall.png', 120, 80)
-#Dash = engine.load_spritesheet('assets/sprites/player/_Dash.png', 120, 80)
-#Attack = engine.load_spritesheet('assets/sprites/player/_Attack.png', 120, 80)
-#Attack2 = engine.load_spritesheet('assets/sprites/player/_Attack2.png', 120, 80)
-#_Turn = engine.load_spritesheet('assets/sprites/player/_TurnAround.png', 120, 80)
-#Wallslide = engine.load_spritesheet('assets/sprites/player/_WallSlide.png', 120, 80)
-#
-#Turn = []
-#for frame in _Turn:
-#    frame = pygame.transform.flip(frame, True, False)
-#    Turn.append(frame)
-
-
-
-
 
 def instantiate(entity_name, x, y, mirror):
     if entity_name == 'dash':
@@ -117,3 +98,19 @@ def make_dummy(x, y, flip):
 def spawn_coins(x, y, amount):
     for i in range(amount):
         engine.entities.append(instantiate('coin', x - 16, y - 16, False))
+
+def spawn_enemy(x, y):
+        entity = engine.Entity()
+        entity.name = 'enemy'
+        entity.type = 'enemy'
+        entity.transform = engine.Transform(0, 0, 48*4, 43*4, False)
+        entity.collider = engine.Transform(x, y, 36*4, 43*4, False)
+        entity.animations = engine.Animations()
+        tileset = engine.load_spritesheet('assets/sprites/skeletons/warrior.png', 48, 43)
+        entity.animations.add('idle', engine.Animation(tileset[0:8], 8))
+        entity.animations.add('attack', engine.Animation(tileset[13:26], 8))
+        entity.animations.add('run', engine.Animation(tileset[26:32], 8))
+        entity.animations.add('hit', engine.Animation(tileset[39:44], 8))
+        entity.animations.add('die', engine.Animation(tileset[52:65], 8))
+        entity.controller = Enemy(entity)
+        return entity
