@@ -34,19 +34,10 @@ class Enemy():
         self.attack_delay = 1
         self.attack_timer = 1
 
-        self.find_player()
-
-
-    def find_player(self):
-        self.target = None
-        for e in engine.entities:
-            if e.name == 'player':
-                self.target = e
+        self.target = engine.find_entity('player')
+        self.world = engine.find_entity('world')
         
     def update(self, dt):
-
-        if self.target == None:
-            self.find_player()
 
         self.AI(dt)
 
@@ -67,6 +58,15 @@ class Enemy():
 
     
     def AI(self, dt):
+        # Find current grid position
+
+        if (int((self.transform.l + self.transform.w/2)//128 -1), int((self.transform.t + self.transform.h/2)//128)) in self.world.children:
+            print('AAAAAH')
+
+
+        # Find fastest path to player
+        # Move along path
+
         self.attack_timer -= dt
 
 

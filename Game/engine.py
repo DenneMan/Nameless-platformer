@@ -202,8 +202,7 @@ def deltaTime():
     if delta_time < 0.33:
         return delta_time
     else:
-        print('Shit\'s fucked ')
-        return 0
+        return 0.33
 
 ##################
 #  Object types  #
@@ -379,3 +378,8 @@ def collide_rects(this, other):
         cr = True
 
     return [cu, cd, cl, cr]
+
+def find_entity(name):
+    for e in entities:
+        if e.name == name:
+            return e

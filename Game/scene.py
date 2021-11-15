@@ -85,22 +85,18 @@ class Game(Scene):
         self.camera_sys = engine.CameraSystem()
         self.playing, self.running = False, True
 
-        self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP = False, False, False, False, False, False, False, False, False, False, False, False
-
-        self.player = helper.instantiate('player', SCREEN_W / 2, 400, False)
-        enemy = helper.spawn_enemy(SCREEN_W / 2, SCREEN_H / 2)
-
-        dummy = helper.make_dummy(SCREEN_W / 2, SCREEN_H / 2, False)
-
-        self.camera_sys = engine.CameraSystem()
-
         self.wall_tileset = engine.load_spritesheet('assets\\tilesets\\Walls.png', 32, 32)
         self.bg_tileset = engine.load_spritesheet('assets\\tilesets\\background\\background.png', 32, 32)
         World(self.wall_tileset, self.bg_tileset, 'assets\\tilesets\\walls\\Map.json')
 
-        engine.entities.append(enemy)
-        engine.entities.append(dummy)
+        self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP = False, False, False, False, False, False, False, False, False, False, False, False
+
+        self.player = helper.instantiate('player', SCREEN_W / 2, 400, False)
         engine.entities.append(self.player)
+        enemy = helper.spawn_enemy(SCREEN_W / 2, 400)
+        engine.entities.append(enemy)
+        dummy = helper.make_dummy(SCREEN_W / 2, 400, False)
+        engine.entities.append(dummy)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
     def input(self, sm):
