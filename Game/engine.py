@@ -37,7 +37,7 @@ class CameraSystem(System):
             self.draw_entity(e, surface, entity)
             if DEBUG:
                 if e.collider != None:
-                    collider = e.collider.get_rect()
+                    collider = pygame.Rect(e.collider.l, e.collider.t, e.collider.w, e.collider.h)
                     pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + self.offset.x), int(collider.y / entity.camera.zoom + self.offset.y), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
 
         #TODO - Fix gui, Reason: I made the preformance better by drawing individual pixels instead of 4 pixels per pixel
@@ -199,10 +199,7 @@ def deltaTime():
     this_frame_time = time.time()
     delta_time = this_frame_time - last_frame_time
     last_frame_time = this_frame_time
-    if delta_time < 0.33:
-        return delta_time
-    else:
-        return 0.33
+    return delta_time
 
 ##################
 #  Object types  #
@@ -352,7 +349,9 @@ def update(dt, player):
             entity.animations.update(dt)
 
         if entity.type == 'collectable':
-            if sum(collide_rects(player.collider, entity.transform)):
+            p_rect = pygame.Rect(player.collider.l, player.collider.t, player.collider.w, player.collider.h)
+            e_rect = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
+            if p_rect.colliderect(e_rect):
                 entities.remove(entity)
 
         if entity.destruct:

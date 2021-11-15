@@ -91,11 +91,11 @@ class Game(Scene):
 
         self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP = False, False, False, False, False, False, False, False, False, False, False, False
 
-        self.player = helper.instantiate('player', SCREEN_W / 2, 400, False)
+        self.player = helper.instantiate('player', SCREEN_W * 2, 400, False)
         engine.entities.append(self.player)
-        enemy = helper.spawn_enemy(SCREEN_W / 2, 400)
+        enemy = helper.spawn_enemy(SCREEN_W * 2, 400)
         engine.entities.append(enemy)
-        dummy = helper.make_dummy(SCREEN_W / 2, 400, False)
+        dummy = helper.make_dummy(SCREEN_W * 2, 400, False)
         engine.entities.append(dummy)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
@@ -123,6 +123,9 @@ class Game(Scene):
             self.player.controller.direction = RIGHT
         if self.DASH:
             self.player.controller.is_dashing = True
+        if self.player.controller.health <= 0:
+            sm.pop()
+            sm.push(Fade(self, None, 0.5))
     def update(self, sm, dt):
         engine.update(dt, self.player)
     def draw(self, sm, surface):

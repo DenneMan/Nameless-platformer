@@ -16,11 +16,14 @@ class Enemy():
 
         self.vel = pygame.math.Vector2(0, 0)
         self.terminal_velocity = 1500
-        self.is_grounded = False
         self.friction = 6.4
         self.direction = LEFT
 
         self.is_attacking = False
+        self.is_grounded = False
+        self.is_jumping = False
+
+        self.jump_force = 1000
 
         self.combo = 0
 
@@ -34,10 +37,23 @@ class Enemy():
         self.attack_delay = 1
         self.attack_timer = 1
 
+        self.is_currently_attacking = False
+        self.time_since_attack = 0
+
+
         self.target = engine.find_entity('player')
         self.world = engine.find_entity('world')
+
+        self.damage = 100
         
     def update(self, dt):
+        if self.is_currently_attacking == True:
+            self.time_since_attack += dt
+        if self.time_since_attack > 0.5:
+            self.attack_check()
+            self.is_currently_attacking = False
+        if self.is_currently_attacking == False:
+            self.time_since_attack = 0
 
         self.AI(dt)
 
@@ -58,14 +74,37 @@ class Enemy():
 
     
     def AI(self, dt):
-        # Find current grid position
 
-        if (int((self.transform.l + self.transform.w/2)//128 -1), int((self.transform.t + self.transform.h/2)//128)) in self.world.children:
-            print('AAAAAH')
+        tile_x = int((self.transform.l + self.transform.w/2)/TILE_SIZE)
+        tile_y = int((self.transform.t + self.transform.h/2)/TILE_SIZE)
 
+        self.tile_pos = (tile_x, tile_y)
 
-        # Find fastest path to player
-        # Move along path
+        if self.direction == RIGHT:
+            if str((tile_x + 1, tile_y)) in self.world.children:
+                if str((tile_x + 1, tile_y - 1)) not in self.world.children:
+                    self.is_jumping = True
+            else:
+                if str((tile_x, tile_y + 1)) not in self.world.children:
+                    if str((tile_x + 1, tile_y + 1)) not in self.world.children:
+                        if str((tile_x, tile_y + 2)) not in self.world.children:
+                            self.is_jumping = True
+        elif self.direction == LEFT:
+            if str((tile_x - 1, tile_y)) in self.world.children:
+                if str((tile_x - 1, tile_y - 1)) not in self.world.children:
+                    self.is_jumping = True
+            else:
+                if str((tile_x, tile_y + 1)) not in self.world.children:
+                    if str((tile_x - 1, tile_y + 1)) not in self.world.children:
+                        if str((tile_x, tile_y + 2)) not in self.world.children:
+                            self.is_jumping = True
+
+        dist_x = (self.collider.l + self.collider.w / 2) - (self.target.collider.l + self.target.collider.w / 2)
+
+        if -100 < dist_x < 100:
+            if self.target.collider.b < self.collider.t:
+                if not self.target.collider.b < self.collider.t - 256:
+                    self.is_jumping = True
 
         self.attack_timer -= dt
 
@@ -75,17 +114,19 @@ class Enemy():
         if self.collide_left:
             self.direction = RIGHT
 
-        if self.target.collider.l > self.collider.l:
+        if self.target.collider.l > self.collider.l + 10:
             self.direction = RIGHT
-        elif self.target.collider.l < self.collider.l:
+        elif self.target.collider.l < self.collider.l - 10:
             self.direction = LEFT
+        else:
+            self.direction = STOP
 
         dist_from_player = math.sqrt(math.pow(self.target.collider.l - self.collider.l, 2) + math.pow(self.target.collider.t - self.collider.t, 2))
         if dist_from_player < 100:
             self.direction = STOP
             if self.attack_timer < 0:
                 self.is_attacking = True
-                self.attack_timer = self.attack_delay
+                self.attack_timer = self.attack_delay        
 
 
     def horizontal_movement(self, dt):
@@ -97,10 +138,16 @@ class Enemy():
             self.vel.x = 0
 
     def vertical_movement(self, dt):
+        if self.is_jumping:
+            if self.is_grounded:
+                self.jump()
+            self.is_jumping = False
         self.vel.y += GRAVITY * dt
         self.vel.y = max(min(self.terminal_velocity, self.vel.y), -self.terminal_velocity)
     
-    
+    def jump(self):
+        self.vel.y = -self.jump_force
+
     def collision(self):
         self.is_grounded = False
         self.collide_left = False
@@ -138,9 +185,31 @@ class Enemy():
                 self.vel.x = 0
                 self.collider.set_left(rect.r + C_THRESHOLD)
                 self.collide_left = True
+
+    def attack_check(self):
+        rect = pygame.Rect(self.transform.l, self.transform.t, self.transform.w, self.transform.h)
+
+        if self.transform.mirrored:
+            attack_rect = pygame.Rect(rect.x + 10, rect.y + rect.height / 2, rect.width * 0.7, rect.height / 2)
+        else:
+            attack_rect = pygame.Rect(rect.x + rect.width - 10 - rect.width * 0.7, rect.y + rect.height / 2, rect.width * 0.7, rect.height / 2)
+
+        if DEBUG:
+            attack_entity = engine.Entity()
+            attack_entity.collider = engine.Transform(attack_rect.x, attack_rect.y, attack_rect.width, attack_rect.height, False)
+            attack_entity.destruct = True
+            attack_entity.destruct_timer = 0.5
+            engine.entities.append(attack_entity)
+
+        for entity in engine.entities:
+            if entity.name == 'player':
+                c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
+                if attack_rect.colliderect(c):
+                    entity.controller.hit(self.damage)
     
     def hit(self):
         self.combo += 1
+        self.is_currently_attacking = False
         if self.animations.state == 'hit':
             self.animations.animations_list['hit'].image_index = 0
         else:
@@ -150,15 +219,13 @@ class Enemy():
         helper.spawn_coins(self.collider.l + self.collider.w / 2, self.collider.t + self.collider.h / 2, 1)
 
     def set_state(self):
-        # GROUNDED OR NOT
         if self.is_grounded:
-            # ATTACK
             if self.is_attacking:
                 if self.animations.state != 'attack':
                     self.animations.next('attack')
                     self.animations.force_skip()
                     self.is_attacking = False
-            # IDLE OR RUN
+                    self.is_currently_attacking = True
             if self.direction == RIGHT:
                 self.transform.mirrored = False
                 self.animations.next('run')

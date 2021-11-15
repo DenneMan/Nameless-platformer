@@ -102,9 +102,8 @@ def spawn_coins(x, y, amount):
 def spawn_enemy(x, y):
         entity = engine.Entity()
         entity.name = 'enemy'
-        entity.type = 'enemy'
         entity.transform = engine.Transform(0, 0, 48*4, 43*4, False)
-        entity.collider = engine.Transform(x, y, 36*4, 43*4, False)
+        entity.collider = engine.Transform(x, y, 16*4, 30*4, False)
         entity.animations = engine.Animations()
         tileset = engine.load_spritesheet('assets/sprites/skeletons/warrior.png', 48, 43)
         entity.animations.add('idle', engine.Animation(tileset[0:8], 8))

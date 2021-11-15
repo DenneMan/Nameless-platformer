@@ -4,9 +4,6 @@ import helper
 from config import *
 import math
 
-#################################################
-#  Main player class, used for the player only  #
-#################################################
 class Player():
 
     def __init__(self, _self):
@@ -53,6 +50,8 @@ class Player():
 
         self.attack_delay = 0.5
         self.attack_timer = 0.5
+
+        self.health = 1000
 
     def update(self, dt):
         if self.is_attacking:
@@ -121,13 +120,13 @@ class Player():
     def dash(self, direction):
         if direction == LEFT:
             self.vel.x = -self.dash_force
-            engine.entities.append(helper.instantiate('dash', self.rect.left, self.rect.bottom, True))
+            engine.entities.append(helper.instantiate('dash', self.collider.l, self.collider.b, True))
             self.animations.next('dash')
             self.animations.force_skip()
             self.dash_timer = self.dash_delay
         if direction == RIGHT:
             self.vel.x = self.dash_force
-            engine.entities.append(helper.instantiate('dash', self.rect.right, self.rect.bottom, False))
+            engine.entities.append(helper.instantiate('dash', self.collider.r, self.collider.r, False))
             self.animations.next('dash')
             self.animations.force_skip()
             self.dash_timer = self.dash_delay
@@ -225,14 +224,18 @@ class Player():
         if DEBUG:
             attack_entity = engine.Entity()
             attack_entity.collider = engine.Transform(attack_rect.x, attack_rect.y, attack_rect.width, attack_rect.height, False)
+            attack_entity.destruct = True
+            attack_entity.destruct_timer = 0.5
             engine.entities.append(attack_entity)
 
         for entity in engine.entities:
-            if entity.type == 'enemy':
+            if entity.name == 'enemy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
                     entity.controller.hit()
 
+    def hit(self, damage):
+        self.health -= damage
 
     def set_state(self):
         # GROUNDED OR NOT
