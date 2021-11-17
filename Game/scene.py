@@ -188,11 +188,13 @@ class SceneManager:
         if not self.isEmpty():
             self.scenes[-1].draw(self, surface)
     def push(self, scene):
+        # Adds a scene at the top of the stack
         if not self.isEmpty():
             self.scenes[-1].onExit()
         self.scenes.append(scene)
         self.scenes[-1].onEnter()
     def pop(self):
+        # Remove the scene on the top of the stack
         self.scenes[-1].onExit()
         self.scenes.pop()
         if not self.isEmpty():

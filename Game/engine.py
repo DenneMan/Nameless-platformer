@@ -331,11 +331,9 @@ class Entity():
         self.animations = None
         self.sprite = None
 
-        score = None
 
         self.controller = None
         self.camera = None
-        self.gui = None
 
         self.static_collision = False
 
@@ -382,3 +380,8 @@ def find_entity(name):
     for e in entities:
         if e.name == name:
             return e
+
+def ease_in_out(speed, time):
+    a = speed
+    x = time
+    return (x ** a) / (x ** a + (1 - x) ** a)

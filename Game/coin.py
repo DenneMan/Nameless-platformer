@@ -61,7 +61,7 @@ class Coin():
             if self.collider.b < rect.t or self.collider.t > rect.b or self.collider.l > rect.r or self.collider.r < rect.l: 
                 return
 
-            
+
             if self.collider.b >= rect.t and self.collider.old_b < rect.old_t:
                 self.vel.y = 0
                 self.collider.set_bottom(rect.t - C_THRESHOLD)

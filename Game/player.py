@@ -235,6 +235,10 @@ class Player():
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
                     entity.controller.hit(self.damage)
+            elif entity.name == 'dummy':
+                c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
+                if attack_rect.colliderect(c):
+                    entity.controller.hit()
 
     def hit(self, damage):
         self.health -= damage

@@ -53,17 +53,20 @@ class Enemy():
         self.has_activated = False
         
     def update(self, dt):
-        if self.is_currently_attacking == True:
-            self.time_since_attack += dt
-        if self.time_since_attack > 1:
-            self.attack_check()
-            self.is_currently_attacking = False
-        if self.is_currently_attacking == False:
-            self.time_since_attack = 0
+        if self.health > 0:
+            if self.is_currently_attacking == True:
+                self.time_since_attack += dt
+            if self.time_since_attack > 1:
+                self.attack_check()
+                self.is_currently_attacking = False
+            if self.is_currently_attacking == False:
+                self.time_since_attack = 0
 
-        self.AI(dt)
+            self.AI(dt)
 
-        self.horizontal_movement(dt)
+            self.horizontal_movement(dt)
+        else:
+            self.vel.x = 0
         self.vertical_movement(dt)
 
 
@@ -82,7 +85,7 @@ class Enemy():
         if self.health <= 0 and self.has_activated == False:
             self.animations.next("die")
             self._self.destruct = True
-            self._self.destruct_timer = 10
+            self._self.destruct_timer = 1.62
             self.has_activated = True
 
 
@@ -222,40 +225,42 @@ class Enemy():
                     entity.controller.hit(self.damage)
     
     def hit(self, damage):
-        self.combo += 1
-        self.is_currently_attacking = False
-        if self.animations.state == 'hit':
-            self.animations.animations_list['hit'].image_index = 0
-        else:
-            self.animations.next('hit')
-            self.animations.force_skip()
-        helper.combo_text.set_text(str(self.combo))
-        helper.spawn_coins(self.collider.l + self.collider.w / 2, self.collider.t + self.collider.h / 2, 1)
-        self.health -= damage
+        if self.health > 0:
+            self.combo += 1
+            self.is_currently_attacking = False
+            if self.animations.state == 'hit':
+                self.animations.animations_list['hit'].image_index = 0
+            else:
+                self.animations.next('hit')
+                self.animations.force_skip()
+            helper.combo_text.set_text(str(self.combo))
+            helper.spawn_coins(self.collider.l + self.collider.w / 2, self.collider.t + self.collider.h / 2, 1)
+            self.health -= damage
 
     def set_state(self):
-        if self.is_grounded:
-            if self.is_attacking:
-                if self.animations.state != 'attack':
-                    self.animations.next('attack')
-                    self.animations.force_skip()
-                    self.is_attacking = False
-                    self.is_currently_attacking = True
-            if self.direction == RIGHT:
-                self.transform.mirrored = False
-                self.animations.next('run')
-                if self.animations.state == 'idle':
-                    self.animations.force_skip()
-            elif self.direction == LEFT:
-                self.transform.mirrored = True
-                self.animations.next('run')
-                if self.animations.state == 'idle':
-                    self.animations.force_skip()
-            elif self.direction == STOP:
+        if self.health > 0:
+            if self.is_grounded:
+                if self.is_attacking:
+                    if self.animations.state != 'attack':
+                        self.animations.next('attack')
+                        self.animations.force_skip()
+                        self.is_attacking = False
+                        self.is_currently_attacking = True
+                if self.direction == RIGHT:
+                    self.transform.mirrored = False
+                    self.animations.next('run')
+                    if self.animations.state == 'idle':
+                        self.animations.force_skip()
+                elif self.direction == LEFT:
+                    self.transform.mirrored = True
+                    self.animations.next('run')
+                    if self.animations.state == 'idle':
+                        self.animations.force_skip()
+                elif self.direction == STOP:
+                    self.animations.next('idle')
+                    if self.animations.state == 'run':
+                        self.animations.force_skip()
+            else:
                 self.animations.next('idle')
-                if self.animations.state == 'run':
+                if self.animations.state != 'idle':
                     self.animations.force_skip()
-        else:
-            self.animations.next('idle')
-            if self.animations.state != 'idle':
-                self.animations.force_skip()
