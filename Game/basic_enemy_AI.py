@@ -6,6 +6,7 @@ import math
 
 class Enemy():
     def __init__(self, _self):
+        self._self = _self
         self.transform = _self.transform
         self.collider = _self.collider
         self.transform.set_left(self.collider.l - ((self.transform.w - self.collider.w) / 2))
@@ -44,12 +45,17 @@ class Enemy():
         self.target = engine.find_entity('player')
         self.world = engine.find_entity('world')
 
+        self.health = 300
+        self.max_health = 300
+
         self.damage = 100
+
+        self.has_activated = False
         
     def update(self, dt):
         if self.is_currently_attacking == True:
             self.time_since_attack += dt
-        if self.time_since_attack > 0.5:
+        if self.time_since_attack > 1:
             self.attack_check()
             self.is_currently_attacking = False
         if self.is_currently_attacking == False:
@@ -71,6 +77,14 @@ class Enemy():
         self.collision()
 
         self.set_state()
+        
+        
+        if self.health <= 0 and self.has_activated == False:
+            self.animations.next("die")
+            self._self.destruct = True
+            self._self.destruct_timer = 10
+            self.has_activated = True
+
 
     
     def AI(self, dt):
@@ -207,7 +221,7 @@ class Enemy():
                 if attack_rect.colliderect(c):
                     entity.controller.hit(self.damage)
     
-    def hit(self):
+    def hit(self, damage):
         self.combo += 1
         self.is_currently_attacking = False
         if self.animations.state == 'hit':
@@ -217,6 +231,7 @@ class Enemy():
             self.animations.force_skip()
         helper.combo_text.set_text(str(self.combo))
         helper.spawn_coins(self.collider.l + self.collider.w / 2, self.collider.t + self.collider.h / 2, 1)
+        self.health -= damage
 
     def set_state(self):
         if self.is_grounded:

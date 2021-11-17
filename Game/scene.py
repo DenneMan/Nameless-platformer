@@ -4,6 +4,7 @@ from datetime import datetime
 import engine
 import helper
 from world import World
+from gui import GUI
 
 class Scene():
     def __init__(self):
@@ -99,6 +100,8 @@ class Game(Scene):
         engine.entities.append(dummy)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
+
+        self.gui = GUI()
     def input(self, sm):
         super().input(sm)
         if self.BACK:
@@ -130,6 +133,7 @@ class Game(Scene):
         engine.update(dt, self.player)
     def draw(self, sm, surface):
         self.camera_sys.update(surface)
+        self.gui.update(surface, self.camera_sys.offset)
 
 class Transition(Scene):
     def __init__(self, fromScene, toScene, length):

@@ -52,6 +52,8 @@ class Player():
         self.attack_timer = 0.5
 
         self.health = 1000
+        self.max_health = 1000
+        self.damage = 100
 
     def update(self, dt):
         if self.is_attacking:
@@ -232,7 +234,7 @@ class Player():
             if entity.name == 'enemy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    entity.controller.hit()
+                    entity.controller.hit(self.damage)
 
     def hit(self, damage):
         self.health -= damage
