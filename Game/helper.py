@@ -107,9 +107,9 @@ def spawn_enemy(x, y):
         entity.animations = engine.Animations()
         tileset = engine.load_spritesheet('assets/sprites/skeletons/warrior.png', 48, 43)
         entity.animations.add('idle', engine.Animation(tileset[0:8], 8))
-        entity.animations.add('attack', engine.Animation(tileset[13:26], 8))
+        entity.animations.add('attack', engine.Animation(tileset[13:26], 10))
         entity.animations.add('run', engine.Animation(tileset[26:32], 8))
         entity.animations.add('hit', engine.Animation(tileset[39:44], 8))
-        entity.animations.add('die', engine.Animation(tileset[52:65], 8))
+        entity.animations.add('die', engine.Animation(tileset[52:78], 12))
         entity.controller = Enemy(entity)
         return entity

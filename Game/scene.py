@@ -96,8 +96,6 @@ class Game(Scene):
         engine.entities.append(self.player)
         enemy = helper.spawn_enemy(SCREEN_W * 2, 400)
         engine.entities.append(enemy)
-        dummy = helper.make_dummy(SCREEN_W * 2, 400, False)
-        engine.entities.append(dummy)
 
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
 
@@ -131,9 +129,17 @@ class Game(Scene):
             sm.push(Fade(self, None, 0.5))
     def update(self, sm, dt):
         engine.update(dt, self.player)
+        self.gui.update(dt)
+        a = 0
+        for e in engine.entities:
+            if e.name == 'enemy':
+                a += 1
+        if a == 0:
+            enemy = helper.spawn_enemy(SCREEN_W * 2, 400)
+            engine.entities.append(enemy)
     def draw(self, sm, surface):
         self.camera_sys.update(surface)
-        self.gui.update(surface, self.camera_sys.offset)
+        self.gui.draw(surface, self.camera_sys.offset)
 
 class Transition(Scene):
     def __init__(self, fromScene, toScene, length):

@@ -4,6 +4,8 @@ import pygame, os
 import engine, scene
 from config import *
 
+pygame.init()
+
 # Position the screen at (0, 0) and...
 os.environ['SDL_VIDEO_WINDOW_POS'] = f"{0},{0}"
 # set the width and height as (SCREEN_W, SCREEN_H) from config.py

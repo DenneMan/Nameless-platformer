@@ -34,9 +34,10 @@ class Enemy():
         self.wallslide_left = False
 
         self.state_timer = 0
+        self.time_until_next_state = 3
 
-        self.attack_delay = 1
-        self.attack_timer = 1
+        self.attack_delay = 0.8
+        self.attack_timer = 0.8
 
         self.is_currently_attacking = False
         self.time_since_attack = 0
@@ -84,66 +85,80 @@ class Enemy():
         
         if self.health <= 0 and self.has_activated == False:
             self.animations.next("die")
+            self.animations.force_skip()
             self._self.destruct = True
-            self._self.destruct_timer = 1.62
+            self._self.destruct_timer = 2.6
             self.has_activated = True
 
 
     
     def AI(self, dt):
-
-        tile_x = int((self.transform.l + self.transform.w/2)/TILE_SIZE)
-        tile_y = int((self.transform.t + self.transform.h/2)/TILE_SIZE)
-
-        self.tile_pos = (tile_x, tile_y)
-
-        if self.direction == RIGHT:
-            if str((tile_x + 1, tile_y)) in self.world.children:
-                if str((tile_x + 1, tile_y - 1)) not in self.world.children:
-                    self.is_jumping = True
-            else:
-                if str((tile_x, tile_y + 1)) not in self.world.children:
-                    if str((tile_x + 1, tile_y + 1)) not in self.world.children:
-                        if str((tile_x, tile_y + 2)) not in self.world.children:
-                            self.is_jumping = True
-        elif self.direction == LEFT:
-            if str((tile_x - 1, tile_y)) in self.world.children:
-                if str((tile_x - 1, tile_y - 1)) not in self.world.children:
-                    self.is_jumping = True
-            else:
-                if str((tile_x, tile_y + 1)) not in self.world.children:
-                    if str((tile_x - 1, tile_y + 1)) not in self.world.children:
-                        if str((tile_x, tile_y + 2)) not in self.world.children:
-                            self.is_jumping = True
-
-        dist_x = (self.collider.l + self.collider.w / 2) - (self.target.collider.l + self.target.collider.w / 2)
-
-        if -100 < dist_x < 100:
-            if self.target.collider.b < self.collider.t:
-                if not self.target.collider.b < self.collider.t - 256:
-                    self.is_jumping = True
-
-        self.attack_timer -= dt
-
-
-        if self.collide_right:
-            self.direction = LEFT
-        if self.collide_left:
-            self.direction = RIGHT
-
-        if self.target.collider.l > self.collider.l + 10:
-            self.direction = RIGHT
-        elif self.target.collider.l < self.collider.l - 10:
-            self.direction = LEFT
-        else:
-            self.direction = STOP
-
         dist_from_player = math.sqrt(math.pow(self.target.collider.l - self.collider.l, 2) + math.pow(self.target.collider.t - self.collider.t, 2))
-        if dist_from_player < 100:
-            self.direction = STOP
-            if self.attack_timer < 0:
-                self.is_attacking = True
-                self.attack_timer = self.attack_delay        
+
+        if dist_from_player < SCREEN_W/2:
+
+            tile_x = int((self.transform.l + self.transform.w/2)/TILE_SIZE)
+            tile_y = int((self.transform.t + self.transform.h/2)/TILE_SIZE)
+
+            self.tile_pos = (tile_x, tile_y)
+
+            if self.direction == RIGHT:
+                if str((tile_x + 1, tile_y)) in self.world.children:
+                    if str((tile_x + 1, tile_y - 1)) not in self.world.children:
+                        self.is_jumping = True
+                else:
+                    if str((tile_x, tile_y + 1)) not in self.world.children:
+                        if str((tile_x + 1, tile_y + 1)) not in self.world.children:
+                            if str((tile_x, tile_y + 2)) not in self.world.children:
+                                self.is_jumping = True
+            elif self.direction == LEFT:
+                if str((tile_x - 1, tile_y)) in self.world.children:
+                    if str((tile_x - 1, tile_y - 1)) not in self.world.children:
+                        self.is_jumping = True
+                else:
+                    if str((tile_x, tile_y + 1)) not in self.world.children:
+                        if str((tile_x - 1, tile_y + 1)) not in self.world.children:
+                            if str((tile_x, tile_y + 2)) not in self.world.children:
+                                self.is_jumping = True
+
+            dist_x = (self.collider.l + self.collider.w / 2) - (self.target.collider.l + self.target.collider.w / 2)
+
+            if -100 < dist_x < 100:
+                if self.target.collider.b < self.collider.t:
+                    if not self.target.collider.b < self.collider.t - 256:
+                        self.is_jumping = True
+
+            self.attack_timer -= dt
+
+            if self.target.collider.l > self.collider.l + 10:
+                self.direction = RIGHT
+            elif self.target.collider.l < self.collider.l - 10:
+                self.direction = LEFT
+            else:
+                self.direction = STOP
+
+            if dist_from_player < 100:
+                self.direction = STOP
+                if self.attack_timer < 0:
+                    self.is_attacking = True
+                    self.attack_timer = self.attack_delay
+        else:
+            self.state_timer += dt
+
+            if self.state_timer > self.time_until_next_state:
+                self.time_until_next_state = random.randrange(2, 6)
+                if self.direction == STOP:
+                    self.direction = random.randint(1, 2)
+                if self.direction == RIGHT:
+                    self.direction = random.randint(0, 1)
+                if self.direction == LEFT:
+                    self.direction = (random.randint(0, 1) - 1)%2
+
+            if self.collide_right:
+                self.direction = LEFT
+            if self.collide_left:
+                self.direction = RIGHT
+
 
 
     def horizontal_movement(self, dt):
