@@ -4,7 +4,7 @@
   <export target="Map.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="Prototype.tsx"/>
- <tileset firstgid="5" source="../../../../../../../Desktop/Walls.tsx"/>
+ <tileset firstgid="5" source="Walls.tsx"/>
  <tileset firstgid="53" source="../background/Background.tsx"/>
  <layer id="1" name="Prototype" width="38" height="18">
   <data encoding="csv">

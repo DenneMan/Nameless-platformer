@@ -3,7 +3,7 @@ import engine
 import json
 from config import *
 
-class World():
+class World_Inside():
     def __init__(self, wall_tileset, bg_tileset, level):
         self.wall_tileset = wall_tileset
         self.bg_tileset = bg_tileset
@@ -56,4 +56,36 @@ class World():
         tile = engine.Entity()
         tile.transform = engine.Transform(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, False)
         tile.sprite = engine.Sprite(self.bg_tileset[index])
+        return tile
+
+class World_Outside():
+    def __init__(self, tileset, level):
+        self.tileset = tileset
+        tiles = {}
+        with open(level, 'r') as f:
+            data = json.load(f)
+            self.width = data['layers']['outside']['width']
+            level = data['layers']['outside']['data']
+            current_x = 0
+            current_y = 0
+            for wall_index in level:
+                pos = (current_x, current_y)
+                if wall_index - 5 - 48 - 48 >= 0:
+                    print(wall_index)
+                    tiles[str(pos)] = self.make_tile(current_x, current_y, wall_index - 5 - 48 - 48)
+
+                current_x += 1
+                if current_x >= self.width:
+                    current_x = 0
+                    current_y += 1
+        world = engine.Entity()
+        world.name = 'world'
+        world.children = tiles
+        engine.entities.append(world)
+
+    def make_tile(self, x, y, index):
+        tile = engine.Entity()
+        tile.transform = engine.Transform(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, False)
+        tile.sprite = engine.Sprite(self.tileset[index])
+        tile.static_collision = True
         return tile

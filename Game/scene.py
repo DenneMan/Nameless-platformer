@@ -3,8 +3,11 @@ from config import *
 from datetime import datetime
 import engine
 import helper
-from world import World
+from level import Level
+from world import World_Inside, World_Outside
 from gui import GUI
+
+level = Level()
 
 class Scene():
     def __init__(self):
@@ -83,12 +86,16 @@ class MainMenu(Scene):
 class Game(Scene):
     def __init__(self):
         engine.entities = []
-        self.camera_sys = engine.CameraSystem()
+        #self.camera_sys = engine.CameraSystem((39, 39, 54))
+        self.camera_sys = engine.CameraSystem((135, 206, 235))
         self.playing, self.running = False, True
 
-        self.wall_tileset = engine.load_spritesheet('assets\\tilesets\\Walls.png', 32, 32)
-        self.bg_tileset = engine.load_spritesheet('assets\\tilesets\\background\\background.png', 32, 32)
-        World(self.wall_tileset, self.bg_tileset, 'assets\\tilesets\\walls\\Map.json')
+        #self.wall_tileset = engine.load_spritesheet('assets\\sprites\\tilesets\\Walls.png', 32, 32)
+        #self.bg_tileset = engine.load_spritesheet('assets\\sprites\\tilesets\\background.png', 32, 32)
+        #World_Inside(self.wall_tileset, self.bg_tileset, 'assets\\tilesets\\walls\\Map.json')
+
+        self.tileset = engine.load_spritesheet('assets\\sprites\\tilesets\\Outside.png', 32, 32)
+        World_Outside(self.tileset, 'assets\\tilesets\\walls\\Outside_1.json')
 
         self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP = False, False, False, False, False, False, False, False, False, False, False, False
 
@@ -107,12 +114,12 @@ class Game(Scene):
             sm.push(Fade(self, None, 0.5))
         if self.M1:
             self.player.controller.attack()
-        if self.SCR_DOWN:
-            self.player.camera.zoom -= 0.05
-            self.player.camera.zoom = max(self.player.camera.zoom, 0.5)
-        if self.SCR_UP:
-            self.player.camera.zoom += 0.05
-            self.player.camera.zoom = min(self.player.camera.zoom, 2)
+        #if self.SCR_DOWN:
+        #    self.player.camera.zoom -= 0.5
+        #    self.player.camera.zoom = max(self.player.camera.zoom, 0.5)
+        #if self.SCR_UP:
+        #    self.player.camera.zoom += 0.5
+        #    self.player.camera.zoom = min(self.player.camera.zoom, 2)
         if self.BACK:
             self.playing = False
         if self.JUMP:
@@ -128,7 +135,25 @@ class Game(Scene):
             sm.pop()
             sm.push(Fade(self, None, 0.5))
     def update(self, sm, dt):
-        engine.update(dt, self.player)
+        for entity in engine.entities:
+            if entity.animations != None:
+                entity.animations.update(dt)
+
+            if entity.type == 'collectable':
+                p_rect = pygame.Rect(self.player.collider.l, self.player.collider.t, self.player.collider.w, self.player.collider.h)
+                e_rect = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
+                if p_rect.colliderect(e_rect):
+                    engine.entities.remove(entity)
+
+            if entity.destruct:
+                entity.destruct_timer -= dt
+                if entity.destruct_timer <= 0:
+                    if entity.name == "enemy":
+                        level.give_exp(entity.max_health)
+                    engine.entities.remove(entity)
+
+            if entity.controller != None:
+                entity.controller.update(dt)
         self.gui.update(dt)
         a = 0
         for e in engine.entities:

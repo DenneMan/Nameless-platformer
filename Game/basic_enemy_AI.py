@@ -87,7 +87,7 @@ class Enemy():
             self.animations.next("die")
             self.animations.force_skip()
             self._self.destruct = True
-            self._self.destruct_timer = 2.6
+            self._self.destruct_timer = 2.2
             self.has_activated = True
 
 
@@ -163,9 +163,9 @@ class Enemy():
 
     def horizontal_movement(self, dt):
         if self.direction == RIGHT:
-            self.vel.x = 200
+            self.vel.x = 300
         if self.direction == LEFT:
-            self.vel.x = -200
+            self.vel.x = -300
         if self.direction == STOP:
             self.vel.x = 0
 

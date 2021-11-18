@@ -17,14 +17,15 @@ class System():
         pass
 
 class CameraSystem(System):
-    def __init__(self):
+    def __init__(self, fill_color):
         super().__init__()
+        self.fill_color = fill_color
     def check(self, entity):
         return entity.camera is not None
     def _update(self, surface, entity):
         
         surface.set_clip(entity.camera.get_rect())
-        surface.fill((39, 39, 54))
+        surface.fill(self.fill_color)
 
         if entity.camera.tracked_entity != None:
             entity.camera.world_x += ((entity.camera.tracked_entity.transform.l + entity.camera.tracked_entity.transform.w / 2 - entity.camera.world_x) / LERP_SPEED[0]) / entity.camera.zoom
@@ -340,25 +341,6 @@ class Entity():
         self.destruct = False
         self.destruct_timer = None
         self.children = None
-
-def update(dt, player):
-    for entity in entities:
-        if entity.animations != None:
-            entity.animations.update(dt)
-
-        if entity.type == 'collectable':
-            p_rect = pygame.Rect(player.collider.l, player.collider.t, player.collider.w, player.collider.h)
-            e_rect = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
-            if p_rect.colliderect(e_rect):
-                entities.remove(entity)
-
-        if entity.destruct:
-            entity.destruct_timer -= dt
-            if entity.destruct_timer <= 0:
-                entities.remove(entity)
-
-        if entity.controller != None:
-            entity.controller.update(dt)
 
 def collide_rects(this, other):
     cu, cd, cl, cr = False, False, False, False
