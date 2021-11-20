@@ -1,8 +1,6 @@
 import pygame
-import engine
-import helper
+import engine, helper, universal
 from config import *
-import math
 
 class Player():
 
@@ -234,7 +232,11 @@ class Player():
             if entity.name == 'enemy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    entity.controller.hit(self.damage)
+                    damage_mod = 1
+                    for upgrade in universal.scene_manager.scenes[-1].active_upgrades:
+                        if upgrade == 20:
+                            damage_mod *= 1.2
+                    entity.controller.hit(self.damage * damage_mod)
             elif entity.name == 'dummy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
@@ -258,8 +260,10 @@ class Player():
                         self.animations.next('attack2')
                         self.animations.force_skip()
                         do_attack_one = False
+                        universal.sound_manager.playSound('slash_2')
                         self.attack_check(2)
                     if do_attack_one:
+                        universal.sound_manager.playSound('slash_1')
                         self.attack_check(1)
 
                     self.is_attacking = False

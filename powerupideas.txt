@@ -1,0 +1,38 @@
+X, X, Better Eyesight, X, X
+X, Midas Touch, Leg Day, X, X
+Vampyrism, Strong Bloodcells, Acid Blood, Bleeding, X
+Soul Collector, X, X, X, X
+Sharpened Blade, Heavier Blade, Stronger Metal, X, X
+
+Better Eyesight:
+Game zoomes out so you can see farther
+
+Midas Touch:
+More gold
+
+Leg Day:
+You run faster and jump higher
+
+Vampyrism:
+On kill, you gain a percentage of the enemies max health
+
+Strong Bloodcells:
+You gain a higher max health
+
+Acid Blood:
+Enemies take damage when they hit you
+
+Bleeding:
+You inflict bleeding on your enemies
+
+Soul Collector:
+You become stronger after every kill
+
+Sharpened Blade:
+You deal more damage
+
+Heavier Blade:
+You knock your enemies back further
+
+Stronger metal:
+You take less damage

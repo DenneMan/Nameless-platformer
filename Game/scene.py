@@ -1,13 +1,10 @@
-import pygame, math
-from config import *
+import pygame, math, random
 from datetime import datetime
-import engine
-import helper
+import engine, helper, universal
 from level import Level
 from world import World_Inside, World_Outside
 from gui import GUI
-
-level = Level()
+from config import *
 
 class Scene():
     def __init__(self):
@@ -50,7 +47,10 @@ class Scene():
         pass
 
 class MainMenu(Scene):
+    def onEnter(self):
+        universal.sound_manager.playMusic('stray_cat')
     def __init__(self):
+
         current_hour = int(str(datetime.now().time())[:2])
         if current_hour >= 20 or current_hour <= 5:
             cycle = 'Night'
@@ -84,10 +84,15 @@ class MainMenu(Scene):
 
 
 class Game(Scene):
+    def onEnter(self):
+        universal.sound_manager.playMusic('rivaling_force')
     def __init__(self):
+        self.state = 'gaming'
+
         engine.entities = []
         #self.camera_sys = engine.CameraSystem((39, 39, 54))
-        self.camera_sys = engine.CameraSystem((135, 206, 235))
+        self.out_of_bounds = 25 * TILE_SIZE
+        self.camera_sys = engine.CameraSystem((135, 206, 235), self.out_of_bounds)
         self.playing, self.running = False, True
 
         #self.wall_tileset = engine.load_spritesheet('assets\\sprites\\tilesets\\Walls.png', 32, 32)
@@ -107,13 +112,28 @@ class Game(Scene):
         self.text = pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50)
 
         self.gui = GUI()
+
+        self.upgrade_images = engine.load_spritesheet('assets\\sprites\\Icons.png', 24, 24)
+        temp = []
+        for image in self.upgrade_images:
+            temp.append(pygame.transform.scale(image, (256, 256)))
+        self.upgrade_images = temp
+        self.upgrade_choices = None
+        self.upgrade_rects = [pygame.Rect(SCREEN_W / 4 * 1 - 128, SCREEN_H / 2 - 128, 256, 256), pygame.Rect(SCREEN_W / 4 * 2 - 128, SCREEN_H / 2 - 128, 256, 256), pygame.Rect(SCREEN_W / 4 * 3 - 128, SCREEN_H / 2 - 128, 256, 256)]
+        self.clicked_upgrade = None
+        self.active_upgrades = []
     def input(self, sm):
         super().input(sm)
         if self.BACK:
             sm.pop()
             sm.push(Fade(self, None, 0.5))
         if self.M1:
-            self.player.controller.attack()
+            if self.state == 'gaming':
+                self.player.controller.attack()
+            elif self.state == 'upgrading':
+                for i in range(3):
+                    if self.upgrade_rects[i].collidepoint(pygame.mouse.get_pos()):
+                        self.clicked_upgrade = i
         #if self.SCR_DOWN:
         #    self.player.camera.zoom -= 0.5
         #    self.player.camera.zoom = max(self.player.camera.zoom, 0.5)
@@ -131,40 +151,62 @@ class Game(Scene):
             self.player.controller.direction = RIGHT
         if self.DASH:
             self.player.controller.is_dashing = True
-        if self.player.controller.health <= 0:
+        if self.player.controller.health <= 0 or self.player.collider.t > self.out_of_bounds:
             sm.pop()
             sm.push(Fade(self, None, 0.5))
     def update(self, sm, dt):
-        for entity in engine.entities:
-            if entity.animations != None:
-                entity.animations.update(dt)
+        if self.state == 'gaming':
+            for entity in engine.entities:
+                if entity.animations != None:
+                    entity.animations.update(dt)
 
-            if entity.type == 'collectable':
-                p_rect = pygame.Rect(self.player.collider.l, self.player.collider.t, self.player.collider.w, self.player.collider.h)
-                e_rect = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
-                if p_rect.colliderect(e_rect):
-                    engine.entities.remove(entity)
+                if entity.type == 'collectable':
+                    p_rect = pygame.Rect(self.player.collider.l, self.player.collider.t, self.player.collider.w, self.player.collider.h)
+                    e_rect = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
+                    if p_rect.colliderect(e_rect):
+                        universal.sound_manager.playSound('coin_pickup_' + str(random.randint(1, 3)))
+                        engine.entities.remove(entity)
 
-            if entity.destruct:
-                entity.destruct_timer -= dt
-                if entity.destruct_timer <= 0:
+                if entity.destruct:
+                    entity.destruct_timer -= dt
+                    if entity.destruct_timer <= 0:
+                        if entity.name == "enemy":
+                            universal.level_manager.give_exp(entity.controller.max_health)
+                            helper.spawn_coins(entity.collider.l + entity.collider.w / 2, entity.collider.t + entity.collider.h / 2, 5)
+                        engine.entities.remove(entity)
+                else:
                     if entity.name == "enemy":
-                        level.give_exp(entity.max_health)
-                    engine.entities.remove(entity)
+                        if entity.collider.t > self.out_of_bounds:
+                            universal.level_manager.give_exp(entity.controller.max_health / 9)
+                            engine.entities.remove(entity)
 
-            if entity.controller != None:
-                entity.controller.update(dt)
-        self.gui.update(dt)
-        a = 0
-        for e in engine.entities:
-            if e.name == 'enemy':
-                a += 1
-        if a == 0:
-            enemy = helper.spawn_enemy(SCREEN_W * 2, 400)
-            engine.entities.append(enemy)
+
+                if entity.controller != None:
+                    entity.controller.update(dt)
+            self.gui.update(dt)
+            a = 0
+            for e in engine.entities:
+                if e.name == 'enemy':
+                    a += 1
+            if a == 0:
+                enemy = helper.spawn_enemy(SCREEN_W * 2, 400)
+                engine.entities.append(enemy)
+        elif self.state == 'upgrading':
+            if self.clicked_upgrade != None:
+                self.state = 'gaming'
+                self.active_upgrades.append(self.upgrade_choices[self.clicked_upgrade])
+                self.clicked_upgrade = None
     def draw(self, sm, surface):
         self.camera_sys.update(surface)
         self.gui.draw(surface, self.camera_sys.offset)
+        if self.state == 'upgrading':
+            fill = pygame.Surface((SCREEN_W, SCREEN_H))
+            fill.fill((0, 0, 0))
+            fill.set_alpha(200)
+            surface.blit(fill, (0, 0))
+
+            for i in range(3):
+                surface.blit(self.upgrade_images[self.upgrade_choices[i]], self.upgrade_rects[i])
 
 class Transition(Scene):
     def __init__(self, fromScene, toScene, length):

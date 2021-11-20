@@ -1,6 +1,5 @@
 import pygame, random
-import engine
-import helper
+import engine, helper, universal
 from config import *
 import math
 
@@ -123,11 +122,6 @@ class Enemy():
 
             dist_x = (self.collider.l + self.collider.w / 2) - (self.target.collider.l + self.target.collider.w / 2)
 
-            if -100 < dist_x < 100:
-                if self.target.collider.b < self.collider.t:
-                    if not self.target.collider.b < self.collider.t - 256:
-                        self.is_jumping = True
-
             self.attack_timer -= dt
 
             if self.target.collider.l > self.collider.l + 10:
@@ -237,7 +231,11 @@ class Enemy():
             if entity.name == 'player':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    entity.controller.hit(self.damage)
+                    damage_mod = 1
+                    for upgrade in universal.scene_manager.scenes[-1].active_upgrades:
+                        if upgrade == 20:
+                            damage_mod *= 0.9
+                    entity.controller.hit(self.damage * damage_mod)
     
     def hit(self, damage):
         if self.health > 0:
@@ -249,7 +247,6 @@ class Enemy():
                 self.animations.next('hit')
                 self.animations.force_skip()
             helper.combo_text.set_text(str(self.combo))
-            helper.spawn_coins(self.collider.l + self.collider.w / 2, self.collider.t + self.collider.h / 2, 1)
             self.health -= damage
 
     def set_state(self):

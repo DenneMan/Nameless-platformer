@@ -17,21 +17,28 @@ class System():
         pass
 
 class CameraSystem(System):
-    def __init__(self, fill_color):
+    def __init__(self, fill_color, out_of_bounds):
         super().__init__()
         self.fill_color = fill_color
+        self.out_of_bounds = out_of_bounds
     def check(self, entity):
         return entity.camera is not None
     def _update(self, surface, entity):
         
         surface.set_clip(entity.camera.get_rect())
-        surface.fill(self.fill_color)
+
+        if self.fill_color != None:
+            surface.fill(self.fill_color)
 
         if entity.camera.tracked_entity != None:
             entity.camera.world_x += ((entity.camera.tracked_entity.transform.l + entity.camera.tracked_entity.transform.w / 2 - entity.camera.world_x) / LERP_SPEED[0]) / entity.camera.zoom
             entity.camera.world_y += ((entity.camera.tracked_entity.transform.t + entity.camera.tracked_entity.transform.h / 2 - entity.camera.world_y) / LERP_SPEED[1]) / entity.camera.zoom
 
         self.offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
+
+        if self.out_of_bounds != None:
+            if entity.camera.size.y - self.offset.y > self.out_of_bounds:
+                self.offset.y = entity.camera.size.y - self.out_of_bounds
 
         # Draw entities
         for e in entities:
@@ -40,10 +47,6 @@ class CameraSystem(System):
                 if e.collider != None:
                     collider = pygame.Rect(e.collider.l, e.collider.t, e.collider.w, e.collider.h)
                     pygame.draw.rect(surface, (255, 0, 0, 10), pygame.Rect(int(collider.x / entity.camera.zoom + self.offset.x), int(collider.y / entity.camera.zoom + self.offset.y), int(collider.width / entity.camera.zoom), int(collider.height / entity.camera.zoom)))
-
-        #TODO - Fix gui, Reason: I made the preformance better by drawing individual pixels instead of 4 pixels per pixel
-        #if entity.gui != None:
-        #    entity.gui.draw(surface)
 
         surface.set_clip(None)
     

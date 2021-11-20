@@ -71,7 +71,6 @@ class World_Outside():
             for wall_index in level:
                 pos = (current_x, current_y)
                 if wall_index - 5 - 48 - 48 >= 0:
-                    print(wall_index)
                     tiles[str(pos)] = self.make_tile(current_x, current_y, wall_index - 5 - 48 - 48)
 
                 current_x += 1
