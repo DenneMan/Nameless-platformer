@@ -19,7 +19,7 @@ class Player():
         self.friction = 6.4
         self.max_speed = 400
         self.terminal_velocity = 1500
-        self.direction = STOP
+        self.direction = 'stop'
 
         self.is_grounded = False
         self.is_jumping = False
@@ -54,6 +54,9 @@ class Player():
         self.damage = 100
 
     def update(self, dt):
+        if self.health > self.max_health:
+            self.health = self.max_health
+
         if self.is_attacking:
             self.attack_timer -= dt
             if self.attack_timer <= 0:
@@ -65,9 +68,9 @@ class Player():
         else:
             is_flipped_last_frame = False
 
-        if self.direction == RIGHT:
+        if self.direction == 'right':
             self.transform.mirrored = False
-        elif self.direction == LEFT:
+        elif self.direction == 'left':
             self.transform.mirrored = True
 
         if self.is_grounded:
@@ -102,9 +105,9 @@ class Player():
     def horizontal_movement(self, dt):
         self.dash_timer -= dt
 
-        if self.direction == LEFT:
+        if self.direction == 'left':
             self.vel.x -= self.acceleration * dt
-        if self.direction == RIGHT:
+        if self.direction == 'right':
             self.vel.x += self.acceleration * dt
         if self.is_dashing and self.dash_timer < 0:
             self.dash(self.direction)
@@ -113,18 +116,18 @@ class Player():
         if self.vel.x > self.max_speed or self.vel.x < -self.max_speed:
             self.vel.x *= 1 - dt * 5
 
-        if (self.vel.x > 0 and self.direction == LEFT) or (self.vel.x < 0 and self.direction == RIGHT) or self.direction == STOP:
+        if (self.vel.x > 0 and self.direction == 'left') or (self.vel.x < 0 and self.direction == 'right') or self.direction == 'stop':
             if self.is_grounded:
                 self.vel.x -= self.vel.x * self.friction * dt
 
     def dash(self, direction):
-        if direction == LEFT:
+        if direction == 'left':
             self.vel.x = -self.dash_force
             engine.entities.append(helper.instantiate('dash', self.collider.l, self.collider.b, True))
             self.animations.next('dash')
             self.animations.force_skip()
             self.dash_timer = self.dash_delay
-        if direction == RIGHT:
+        if direction == 'right':
             self.vel.x = self.dash_force
             engine.entities.append(helper.instantiate('dash', self.collider.r, self.collider.r, False))
             self.animations.next('dash')
@@ -138,15 +141,15 @@ class Player():
             elif self.wallslide_right:
                 self.wall_jump(LEFT)
             elif self.wallslide_left:
-                self.wall_jump(RIGHT)
+                self.wall_jump('right')
             self.is_jumping = False
 
         self.wallslide_right = False
         self.wallslide_left = False
-        if self.collide_right and self.is_grounded == False and self.direction == RIGHT:
+        if self.collide_right and self.is_grounded == False and self.direction == 'right':
             self.vel.y = GRAVITY / 10
             self.wallslide_right = True
-        elif self.collide_left and self.is_grounded == False and self.direction == LEFT:
+        elif self.collide_left and self.is_grounded == False and self.direction == 'left':
             self.vel.y = GRAVITY / 10
             self.wallslide_left = True
         else:
@@ -159,9 +162,9 @@ class Player():
 
     def wall_jump(self, direction):
         self.vel.y = -self.jump_force
-        if direction == RIGHT:
+        if direction == 'right':
             self.vel.x = self.jump_force
-        elif direction == LEFT:
+        elif direction == 'left':
             self.vel.x = -self.jump_force
         self.transform.mirrored = not self.transform.mirrored
 
@@ -206,7 +209,7 @@ class Player():
 
     def attack(self):
         self.is_attacking = True
-        self.direction = STOP
+        self.direction = 'stop'
 
     def attack_check(self, type):
         rect = pygame.Rect(self.transform.l, self.transform.t, self.transform.w, self.transform.h)
@@ -232,11 +235,7 @@ class Player():
             if entity.name == 'enemy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    damage_mod = 1
-                    for upgrade in universal.scene_manager.scenes[-1].active_upgrades:
-                        if upgrade == 20:
-                            damage_mod *= 1.2
-                    entity.controller.hit(self.damage * damage_mod)
+                    entity.controller.hit(self.damage * universal.damage_mult)
             elif entity.name == 'dummy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):

@@ -1,13 +1,13 @@
 X, X, Better Eyesight, X, X
 X, Midas Touch, Leg Day, X, X
 Vampyrism, Strong Bloodcells, Acid Blood, Bleeding, X
-Soul Collector, X, X, X, X
+Soul Collector, Soul Eater, Soul Blast, X, X
 Sharpened Blade, Heavier Blade, Stronger Metal, X, X
 
 Better Eyesight:
 Game zoomes out so you can see farther
 
-Midas Touch:
+Midas Touch: X
 More gold
 
 Leg Day:
@@ -28,11 +28,17 @@ You inflict bleeding on your enemies
 Soul Collector:
 You become stronger after every kill
 
-Sharpened Blade:
+Soul Eater:
+You consume a soul to heal
+
+Soul Blast:
+Releases all of the souls you've collected to deal massive amounts of damage
+
+Sharpened Blade: X
 You deal more damage
 
 Heavier Blade:
 You knock your enemies back further
 
-Stronger metal:
+Stronger metal: X
 You take less damage

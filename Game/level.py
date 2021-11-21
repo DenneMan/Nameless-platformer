@@ -23,7 +23,7 @@ class Level():
             pu3 = random.randint(0, 24)
             while pu2 == pu1:
                 pu2 = random.randint(0, 24)
-            while pu3 == pu1 and pu3 != pu2:
+            while pu3 == pu1 or pu3 == pu2:
                 pu3 = random.randint(0, 24)
             universal.scene_manager.scenes[-1].upgrade_choices = [pu1, pu2, pu3]
         print(f'{self.level}, {self.exp}/{self.exp_to_level_up}')

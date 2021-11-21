@@ -14,7 +14,7 @@ class Scene():
     def onExit(self):
         pass
     def input(self, sm):
-        self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP = False, False, False, False, False, False, False, False, False, False, False, False
+        self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP, self.ABILITY = False, False, False, False, False, False, False, False, False, False, False, False, False
         self.mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -41,6 +41,8 @@ class Scene():
             self.RIGHT = True
         if active_keys[pygame.K_LSHIFT]:
             self.DASH = True
+        if active_keys[pygame.K_e]:
+            self.ABILITY = True
     def update(self, sm, dt):
         pass
     def draw(self, sm, surface):
@@ -86,6 +88,8 @@ class MainMenu(Scene):
 class Game(Scene):
     def onEnter(self):
         universal.sound_manager.playMusic('rivaling_force')
+    def onExit(self):
+        universal.reset_multipliers()
     def __init__(self):
         self.state = 'gaming'
 
@@ -144,16 +148,19 @@ class Game(Scene):
             self.playing = False
         if self.JUMP:
             self.player.controller.is_jumping = True
-        self.player.controller.direction = STOP
+        self.player.controller.direction = 'stop'
         if self.LEFT and not self.RIGHT:
-            self.player.controller.direction = LEFT
+            self.player.controller.direction = 'left'
         if self.RIGHT and not self.LEFT:
-            self.player.controller.direction = RIGHT
+            self.player.controller.direction = 'right'
         if self.DASH:
             self.player.controller.is_dashing = True
         if self.player.controller.health <= 0 or self.player.collider.t > self.out_of_bounds:
             sm.pop()
             sm.push(Fade(self, None, 0.5))
+        if universal.soul_blast and self.ABILITY:
+            ...
+            #soul.Soul(self.player.collider.l + self.player.collider.w / 2, self.player.collider.t + self.player.collider.h / 2)
     def update(self, sm, dt):
         if self.state == 'gaming':
             for entity in engine.entities:
@@ -172,7 +179,9 @@ class Game(Scene):
                     if entity.destruct_timer <= 0:
                         if entity.name == "enemy":
                             universal.level_manager.give_exp(entity.controller.max_health)
-                            helper.spawn_coins(entity.collider.l + entity.collider.w / 2, entity.collider.t + entity.collider.h / 2, 5)
+                            helper.spawn_coins(entity.collider.l + entity.collider.w / 2, entity.collider.t + entity.collider.h / 2, int((entity.controller.max_health / 100) * universal.gold_mult))
+                            if universal.lifesteal_mult != 0:
+                                self.player.controller.health += entity.controller.max_health * universal.lifesteal_mult
                         engine.entities.remove(entity)
                 else:
                     if entity.name == "enemy":
@@ -195,6 +204,16 @@ class Game(Scene):
             if self.clicked_upgrade != None:
                 self.state = 'gaming'
                 self.active_upgrades.append(self.upgrade_choices[self.clicked_upgrade])
+
+                if self.upgrade_choices[self.clicked_upgrade] == 6:
+                    universal.gold_mult += 0.5
+                if self.upgrade_choices[self.clicked_upgrade] == 10:
+                    universal.lifesteal_mult += 0.05
+                if self.upgrade_choices[self.clicked_upgrade] == 20:
+                    universal.damage_mult += 0.2
+                if self.upgrade_choices[self.clicked_upgrade] == 22:
+                    universal.resistance_mult += 0.2
+
                 self.clicked_upgrade = None
     def draw(self, sm, surface):
         self.camera_sys.update(surface)

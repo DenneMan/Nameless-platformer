@@ -19,6 +19,5 @@ GRAVITY = 1900
 
 LEFT = 0
 STOP = 1
-RIGHT = 2
 
 DEBUG = False

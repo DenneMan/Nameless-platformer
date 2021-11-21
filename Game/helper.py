@@ -3,6 +3,7 @@ from config import *
 from player import Player
 from dummy import Dummy
 from coin import Coin
+from soul import Soul
 from basic_enemy_AI import Enemy
 import pygame
 

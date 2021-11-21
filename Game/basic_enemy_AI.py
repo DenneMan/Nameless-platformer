@@ -17,7 +17,7 @@ class Enemy():
         self.vel = pygame.math.Vector2(0, 0)
         self.terminal_velocity = 1500
         self.friction = 6.4
-        self.direction = LEFT
+        self.direction = 'left'
 
         self.is_attacking = False
         self.is_grounded = False
@@ -101,7 +101,7 @@ class Enemy():
 
             self.tile_pos = (tile_x, tile_y)
 
-            if self.direction == RIGHT:
+            if self.direction == 'right':
                 if str((tile_x + 1, tile_y)) in self.world.children:
                     if str((tile_x + 1, tile_y - 1)) not in self.world.children:
                         self.is_jumping = True
@@ -110,7 +110,7 @@ class Enemy():
                         if str((tile_x + 1, tile_y + 1)) not in self.world.children:
                             if str((tile_x, tile_y + 2)) not in self.world.children:
                                 self.is_jumping = True
-            elif self.direction == LEFT:
+            elif self.direction == 'left':
                 if str((tile_x - 1, tile_y)) in self.world.children:
                     if str((tile_x - 1, tile_y - 1)) not in self.world.children:
                         self.is_jumping = True
@@ -125,14 +125,14 @@ class Enemy():
             self.attack_timer -= dt
 
             if self.target.collider.l > self.collider.l + 10:
-                self.direction = RIGHT
+                self.direction = 'right'
             elif self.target.collider.l < self.collider.l - 10:
-                self.direction = LEFT
+                self.direction = 'left'
             else:
-                self.direction = STOP
+                self.direction = 'stop'
 
             if dist_from_player < 100:
-                self.direction = STOP
+                self.direction = 'stop'
                 if self.attack_timer < 0:
                     self.is_attacking = True
                     self.attack_timer = self.attack_delay
@@ -141,26 +141,26 @@ class Enemy():
 
             if self.state_timer > self.time_until_next_state:
                 self.time_until_next_state = random.randrange(2, 6)
-                if self.direction == STOP:
+                if self.direction == 'stop':
                     self.direction = random.randint(1, 2)
-                if self.direction == RIGHT:
+                if self.direction == 'right':
                     self.direction = random.randint(0, 1)
-                if self.direction == LEFT:
+                if self.direction == 'left':
                     self.direction = (random.randint(0, 1) - 1)%2
 
             if self.collide_right:
-                self.direction = LEFT
+                self.direction = 'left'
             if self.collide_left:
-                self.direction = RIGHT
+                self.direction = 'right'
 
 
 
     def horizontal_movement(self, dt):
-        if self.direction == RIGHT:
+        if self.direction == 'right':
             self.vel.x = 300
-        if self.direction == LEFT:
+        if self.direction == 'left':
             self.vel.x = -300
-        if self.direction == STOP:
+        if self.direction == 'stop':
             self.vel.x = 0
 
     def vertical_movement(self, dt):
@@ -231,11 +231,7 @@ class Enemy():
             if entity.name == 'player':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    damage_mod = 1
-                    for upgrade in universal.scene_manager.scenes[-1].active_upgrades:
-                        if upgrade == 20:
-                            damage_mod *= 0.9
-                    entity.controller.hit(self.damage * damage_mod)
+                    entity.controller.hit(self.damage / universal.resistance_mult)
     
     def hit(self, damage):
         if self.health > 0:
@@ -258,17 +254,17 @@ class Enemy():
                         self.animations.force_skip()
                         self.is_attacking = False
                         self.is_currently_attacking = True
-                if self.direction == RIGHT:
+                if self.direction == 'right':
                     self.transform.mirrored = False
                     self.animations.next('run')
                     if self.animations.state == 'idle':
                         self.animations.force_skip()
-                elif self.direction == LEFT:
+                elif self.direction == 'left':
                     self.transform.mirrored = True
                     self.animations.next('run')
                     if self.animations.state == 'idle':
                         self.animations.force_skip()
-                elif self.direction == STOP:
+                elif self.direction == 'stop':
                     self.animations.next('idle')
                     if self.animations.state == 'run':
                         self.animations.force_skip()
