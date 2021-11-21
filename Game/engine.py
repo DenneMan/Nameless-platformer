@@ -1,4 +1,4 @@
-import pygame, time, inspect
+import pygame, time
 from config import *
 pygame.font.init()
 

@@ -1,6 +1,5 @@
-import pygame
-import engine
 import json
+import engine
 from config import *
 
 class World_Inside():

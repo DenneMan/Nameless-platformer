@@ -1,5 +1,6 @@
 import pygame
-import engine, helper, universal
+import engine, helper
+import temporary, universal
 from config import *
 
 class Player():
@@ -15,9 +16,11 @@ class Player():
 
         self.vel = pygame.math.Vector2(0, 0)
 
+        self.base_acceleration = 1000
         self.acceleration = 1000
-        self.friction = 6.4
+        self.base_max_speed = 400
         self.max_speed = 400
+        self.friction = 6.4
         self.terminal_velocity = 1500
         self.direction = 'stop'
 
@@ -30,6 +33,7 @@ class Player():
         self.dash_timer = 1.5 
         self.dash_delay = 1.5
 
+        self.base_jump_force = 1000
         self.jump_force = 1000
         self.dash_force = 1600
 
@@ -50,10 +54,18 @@ class Player():
         self.attack_timer = 0.5
 
         self.health = 1000
+        self.base_max_health = 1000
         self.max_health = 1000
+        self.base_damage = 100
         self.damage = 100
 
     def update(self, dt):
+        self.acceleration = self.base_acceleration * temporary.legday_mult
+        self.max_speed = self.base_max_speed * temporary.legday_mult
+        self.jump_force = self.base_jump_force * temporary.legday_mult
+
+        self.max_health = self.base_max_health * temporary.max_health_mult
+        
         if self.health > self.max_health:
             self.health = self.max_health
 
@@ -139,7 +151,7 @@ class Player():
             if self.is_grounded:
                 self.jump()
             elif self.wallslide_right:
-                self.wall_jump(LEFT)
+                self.wall_jump('left')
             elif self.wallslide_left:
                 self.wall_jump('right')
             self.is_jumping = False
@@ -235,7 +247,13 @@ class Player():
             if entity.name == 'enemy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    entity.controller.hit(self.damage * universal.damage_mult)
+                    entity.controller.hit(self.damage * temporary.damage_mult)
+                    if (entity.collider.l + entity.collider.w/2) - (self.collider.l + self.collider.w/2) > 0:
+                        x_dir = 100
+                    else:
+                        x_dir = -100
+                    entity.controller.vel.x = x_dir * temporary.knockback_mult 
+                    entity.controller.vel.y -= 300
             elif entity.name == 'dummy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):

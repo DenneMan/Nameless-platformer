@@ -1,6 +1,5 @@
 import pygame
-import engine
-import helper
+import engine, helper
 from config import *
 
 class Dummy():

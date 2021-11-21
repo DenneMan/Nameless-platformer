@@ -17,7 +17,4 @@ PIXEL_SIZE = 4
 
 GRAVITY = 1900
 
-LEFT = 0
-STOP = 1
-
 DEBUG = False

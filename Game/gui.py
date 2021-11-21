@@ -33,10 +33,7 @@ class GUI():
                     
         self.desired_health_percent = self.player.controller.health / self.player.controller.max_health
 
-        if self.desired_health_percent < self.player_health_percent:
-            self.player_health_percent -= (self.player_health_percent - self.desired_health_percent) / 20
-        if self.desired_health_percent > self.player_health_percent:
-            self.player_health_percent += (self.player_health_percent - self.desired_health_percent) / 20
+        self.player_health_percent -= (self.player_health_percent - self.desired_health_percent) / 20
 
     def draw(self, surface, offset):
 

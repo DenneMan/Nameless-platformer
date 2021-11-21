@@ -1,7 +1,7 @@
 import pygame, math, random
 from datetime import datetime
-import engine, helper, universal
-from level import Level
+import engine, helper, level
+import temporary, permanent, universal
 from world import World_Inside, World_Outside
 from gui import GUI
 from config import *
@@ -89,8 +89,10 @@ class Game(Scene):
     def onEnter(self):
         universal.sound_manager.playMusic('rivaling_force')
     def onExit(self):
-        universal.reset_multipliers()
+        temporary.reset_multipliers()
     def __init__(self):
+        self.level_manager = level.TempLevel()
+
         self.state = 'gaming'
 
         engine.entities = []
@@ -158,7 +160,7 @@ class Game(Scene):
         if self.player.controller.health <= 0 or self.player.collider.t > self.out_of_bounds:
             sm.pop()
             sm.push(Fade(self, None, 0.5))
-        if universal.soul_blast and self.ABILITY:
+        if temporary.soul_blast and self.ABILITY:
             ...
             #soul.Soul(self.player.collider.l + self.player.collider.w / 2, self.player.collider.t + self.player.collider.h / 2)
     def update(self, sm, dt):
@@ -178,15 +180,15 @@ class Game(Scene):
                     entity.destruct_timer -= dt
                     if entity.destruct_timer <= 0:
                         if entity.name == "enemy":
-                            universal.level_manager.give_exp(entity.controller.max_health)
-                            helper.spawn_coins(entity.collider.l + entity.collider.w / 2, entity.collider.t + entity.collider.h / 2, int((entity.controller.max_health / 100) * universal.gold_mult))
-                            if universal.lifesteal_mult != 0:
-                                self.player.controller.health += entity.controller.max_health * universal.lifesteal_mult
+                            self.level_manager.give_exp(entity.controller.max_health)
+                            helper.spawn_coins(entity.collider.l + entity.collider.w / 2, entity.collider.t + entity.collider.h / 2, int((entity.controller.max_health / 100) * temporary.gold_mult))
+                            if temporary.lifesteal_mult != 0:
+                                self.player.controller.health += entity.controller.max_health * temporary.lifesteal_mult
                         engine.entities.remove(entity)
                 else:
                     if entity.name == "enemy":
                         if entity.collider.t > self.out_of_bounds:
-                            universal.level_manager.give_exp(entity.controller.max_health / 9)
+                            self.level_manager.give_exp(entity.controller.max_health / 9)
                             engine.entities.remove(entity)
 
 
@@ -206,15 +208,20 @@ class Game(Scene):
                 self.active_upgrades.append(self.upgrade_choices[self.clicked_upgrade])
 
                 if self.upgrade_choices[self.clicked_upgrade] == 6:
-                    universal.gold_mult += 0.5
+                    temporary.gold_mult += 0.5
                 if self.upgrade_choices[self.clicked_upgrade] == 10:
-                    universal.lifesteal_mult += 0.05
+                    temporary.lifesteal_mult += 0.05
+                if self.upgrade_choices[self.clicked_upgrade] == 11:
+                    temporary.max_health_mult += 0.25
                 if self.upgrade_choices[self.clicked_upgrade] == 20:
-                    universal.damage_mult += 0.2
+                    temporary.damage_mult += 0.2
+                if self.upgrade_choices[self.clicked_upgrade] == 21:
+                    temporary.knockback_mult += 0.2
                 if self.upgrade_choices[self.clicked_upgrade] == 22:
-                    universal.resistance_mult += 0.2
+                    temporary.resistance_mult += 0.2
 
                 self.clicked_upgrade = None
+        print(self.player.controller.health)
     def draw(self, sm, surface):
         self.camera_sys.update(surface)
         self.gui.draw(surface, self.camera_sys.offset)

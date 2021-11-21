@@ -1,11 +1,11 @@
+import pygame
 import engine
-from config import *
 from player import Player
 from dummy import Dummy
 from coin import Coin
 from soul import Soul
-from basic_enemy_AI import Enemy
-import pygame
+from enemy import Enemy
+from config import *
 
 combo_text = engine.Text(pygame.font.Font('assets/fonts/EquipmentPro.ttf', 50), '0', (245, 217, 76), (500, 2), 'topleft')
 

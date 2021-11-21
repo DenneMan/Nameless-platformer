@@ -1,7 +1,7 @@
-import pygame, random
-import engine, helper, universal
+import pygame, random, math
+import engine, helper
+import temporary
 from config import *
-import math
 
 class Enemy():
     def __init__(self, _self):
@@ -16,7 +16,9 @@ class Enemy():
 
         self.vel = pygame.math.Vector2(0, 0)
         self.terminal_velocity = 1500
+        self.acceleration = 700
         self.friction = 6.4
+        self.max_speed = 250
         self.direction = 'left'
 
         self.is_attacking = False
@@ -92,9 +94,9 @@ class Enemy():
 
     
     def AI(self, dt):
-        dist_from_player = math.sqrt(math.pow(self.target.collider.l - self.collider.l, 2) + math.pow(self.target.collider.t - self.collider.t, 2))
+        self.dist_from_player = math.sqrt(math.pow(self.target.collider.l - self.collider.l, 2) + math.pow(self.target.collider.t - self.collider.t, 2))
 
-        if dist_from_player < SCREEN_W/2:
+        if self.dist_from_player < SCREEN_W/2:
 
             tile_x = int((self.transform.l + self.transform.w/2)/TILE_SIZE)
             tile_y = int((self.transform.t + self.transform.h/2)/TILE_SIZE)
@@ -131,7 +133,7 @@ class Enemy():
             else:
                 self.direction = 'stop'
 
-            if dist_from_player < 100:
+            if self.dist_from_player < 100:
                 self.direction = 'stop'
                 if self.attack_timer < 0:
                     self.is_attacking = True
@@ -156,12 +158,17 @@ class Enemy():
 
 
     def horizontal_movement(self, dt):
-        if self.direction == 'right':
-            self.vel.x = 300
         if self.direction == 'left':
-            self.vel.x = -300
-        if self.direction == 'stop':
-            self.vel.x = 0
+            self.vel.x -= self.acceleration * dt
+        if self.direction == 'right':
+            self.vel.x += self.acceleration * dt
+
+        if self.vel.x > self.max_speed or self.vel.x < -self.max_speed:
+            self.vel.x *= 1 - dt * 5
+
+        if (self.vel.x > 0 and self.direction == 'left') or (self.vel.x < 0 and self.direction == 'right') or self.direction == 'stop':
+            if self.is_grounded:
+                self.vel.x -= self.vel.x * self.friction * dt
 
     def vertical_movement(self, dt):
         if self.is_jumping:
@@ -231,7 +238,7 @@ class Enemy():
             if entity.name == 'player':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    entity.controller.hit(self.damage / universal.resistance_mult)
+                    entity.controller.hit(self.damage / temporary.resistance_mult)
     
     def hit(self, damage):
         if self.health > 0:
@@ -272,3 +279,7 @@ class Enemy():
                 self.animations.next('idle')
                 if self.animations.state != 'idle':
                     self.animations.force_skip()
+                if self.vel.x > 0:
+                    self.transform.mirrored = False
+                if self.vel.x < 0:
+                    self.transform.mirrored = True
