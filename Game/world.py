@@ -63,8 +63,9 @@ class World_Outside():
         tiles = {}
         with open(level, 'r') as f:
             data = json.load(f)
-            self.width = data['layers']['outside']['width']
-            level = data['layers']['outside']['data']
+            self.width = data['layers'][0]['width']
+            level = data['layers'][0]['data']
+            entities = data['layers'][1]['data']
             current_x = 0
             current_y = 0
             for wall_index in level:
