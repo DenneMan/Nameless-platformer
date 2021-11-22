@@ -37,8 +37,12 @@ class TempLevel():
             pu1 = random.randint(0, 24)
             pu2 = random.randint(0, 24)
             pu3 = random.randint(0, 24)
-            while pu2 == pu1:
+            upgrades = [6, 7, 10, 11, 20, 21, 22]
+            while pu1 not in upgrades:
+                pu1 = random.randint(0, 24)
+            while pu2 == pu1 or pu2 not in upgrades:
                 pu2 = random.randint(0, 24)
-            while pu3 == pu1 or pu3 == pu2:
+            while pu3 == pu1 or pu3 == pu2 or pu3 not in upgrades:
                 pu3 = random.randint(0, 24)
+            
             universal.scene_manager.scenes[-1].upgrade_choices = [pu1, pu2, pu3]

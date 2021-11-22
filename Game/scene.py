@@ -31,7 +31,7 @@ class Scene():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.BACK = True
-        # Keyboard input
+        # Keyboard
         active_keys = pygame.key.get_pressed()
         if active_keys[pygame.K_SPACE]:
             self.JUMP = True
@@ -140,12 +140,6 @@ class Game(Scene):
                 for i in range(3):
                     if self.upgrade_rects[i].collidepoint(pygame.mouse.get_pos()):
                         self.clicked_upgrade = i
-        #if self.SCR_DOWN:
-        #    self.player.camera.zoom -= 0.5
-        #    self.player.camera.zoom = max(self.player.camera.zoom, 0.5)
-        #if self.SCR_UP:
-        #    self.player.camera.zoom += 0.5
-        #    self.player.camera.zoom = min(self.player.camera.zoom, 2)
         if self.BACK:
             self.playing = False
         if self.JUMP:
@@ -161,7 +155,7 @@ class Game(Scene):
             sm.pop()
             sm.push(Fade(self, None, 0.5))
         if temporary.soul_blast and self.ABILITY:
-            ...
+            helper.spawn_soul()
             #soul.Soul(self.player.collider.l + self.player.collider.w / 2, self.player.collider.t + self.player.collider.h / 2)
     def update(self, sm, dt):
         if self.state == 'gaming':
@@ -207,8 +201,13 @@ class Game(Scene):
                 self.state = 'gaming'
                 self.active_upgrades.append(self.upgrade_choices[self.clicked_upgrade])
 
+                allowed_upgrades = [6, 7, 10, 11, 20, 21, 22]
+
+
                 if self.upgrade_choices[self.clicked_upgrade] == 6:
                     temporary.gold_mult += 0.5
+                if self.upgrade_choices[self.clicked_upgrade] == 7:
+                    temporary.legday_mult += 0.25
                 if self.upgrade_choices[self.clicked_upgrade] == 10:
                     temporary.lifesteal_mult += 0.05
                 if self.upgrade_choices[self.clicked_upgrade] == 11:
@@ -221,7 +220,6 @@ class Game(Scene):
                     temporary.resistance_mult += 0.2
 
                 self.clicked_upgrade = None
-        print(self.player.controller.health)
     def draw(self, sm, surface):
         self.camera_sys.update(surface)
         self.gui.draw(surface, self.camera_sys.offset)

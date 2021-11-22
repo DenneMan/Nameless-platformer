@@ -37,8 +37,8 @@ class CameraSystem(System):
         self.offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
 
         if self.out_of_bounds != None:
-            if entity.camera.size.y - self.offset.y > self.out_of_bounds:
-                self.offset.y = entity.camera.size.y - self.out_of_bounds
+            if entity.camera.size.y - self.offset.y > self.out_of_bounds / entity.camera.zoom:
+                self.offset.y = entity.camera.size.y - self.out_of_bounds / entity.camera.zoom
 
         # Draw entities
         for e in entities:

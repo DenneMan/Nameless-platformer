@@ -96,31 +96,31 @@ class Enemy():
     def AI(self, dt):
         self.dist_from_player = math.sqrt(math.pow(self.target.collider.l - self.collider.l, 2) + math.pow(self.target.collider.t - self.collider.t, 2))
 
+        tile_x = int((self.transform.l + self.transform.w/2)/TILE_SIZE)
+        tile_y = int((self.transform.t + self.transform.h/2)/TILE_SIZE)
+
+        self.tile_pos = (tile_x, tile_y)
+
+        if self.direction == 'right':
+            if str((tile_x + 1, tile_y)) in self.world.children:
+                if str((tile_x + 1, tile_y - 1)) not in self.world.children:
+                    self.is_jumping = True
+            else:
+                if str((tile_x, tile_y + 1)) not in self.world.children:
+                    if str((tile_x + 1, tile_y + 1)) not in self.world.children:
+                        if str((tile_x, tile_y + 2)) not in self.world.children:
+                            self.is_jumping = True
+        elif self.direction == 'left':
+            if str((tile_x - 1, tile_y)) in self.world.children:
+                if str((tile_x - 1, tile_y - 1)) not in self.world.children:
+                    self.is_jumping = True
+            else:
+                if str((tile_x, tile_y + 1)) not in self.world.children:
+                    if str((tile_x - 1, tile_y + 1)) not in self.world.children:
+                        if str((tile_x, tile_y + 2)) not in self.world.children:
+                            self.is_jumping = True
+
         if self.dist_from_player < SCREEN_W/2:
-
-            tile_x = int((self.transform.l + self.transform.w/2)/TILE_SIZE)
-            tile_y = int((self.transform.t + self.transform.h/2)/TILE_SIZE)
-
-            self.tile_pos = (tile_x, tile_y)
-
-            if self.direction == 'right':
-                if str((tile_x + 1, tile_y)) in self.world.children:
-                    if str((tile_x + 1, tile_y - 1)) not in self.world.children:
-                        self.is_jumping = True
-                else:
-                    if str((tile_x, tile_y + 1)) not in self.world.children:
-                        if str((tile_x + 1, tile_y + 1)) not in self.world.children:
-                            if str((tile_x, tile_y + 2)) not in self.world.children:
-                                self.is_jumping = True
-            elif self.direction == 'left':
-                if str((tile_x - 1, tile_y)) in self.world.children:
-                    if str((tile_x - 1, tile_y - 1)) not in self.world.children:
-                        self.is_jumping = True
-                else:
-                    if str((tile_x, tile_y + 1)) not in self.world.children:
-                        if str((tile_x - 1, tile_y + 1)) not in self.world.children:
-                            if str((tile_x, tile_y + 2)) not in self.world.children:
-                                self.is_jumping = True
 
             dist_x = (self.collider.l + self.collider.w / 2) - (self.target.collider.l + self.target.collider.w / 2)
 
@@ -148,7 +148,8 @@ class Enemy():
                 if self.direction == 'right':
                     self.direction = random.randint(0, 1)
                 if self.direction == 'left':
-                    self.direction = (random.randint(0, 1) - 1)%2
+                    self.direction = (random.randint(0, 1) - 1)
+                    self.state_timer = 0
 
             if self.collide_right:
                 self.direction = 'left'

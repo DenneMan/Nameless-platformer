@@ -114,3 +114,9 @@ def spawn_enemy(x, y):
         entity.animations.add('die', engine.Animation(tileset[52:78], 12))
         entity.controller = Enemy(entity)
         return entity
+
+def spawn_soul(x, y, flip):
+    entity = engine.Entity()
+    entity.name = 'projectile'
+    entity.transform = engine.Transform(0, 0, 48*4, 43*4, False)
+
