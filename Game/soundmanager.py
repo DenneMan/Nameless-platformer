@@ -12,7 +12,9 @@ class SoundManager():
             'hit_1': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\4. Impact\\Hit_2.wav'),
             'hit_2': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\4. Impact\\Hit_4.wav'),
             'slash_1': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\4. Impact\\Metal_woosh_1.wav'),
-            'slash_2': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\4. Impact\\Metal_woosh_2.wav')
+            'slash_2': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\4. Impact\\Metal_woosh_2.wav'),
+            'click_1': pygame.mixer.Sound('assets\\audio\\sounds\\UI\\2. Clicks\\Click_5.wav'),
+            'click_2': pygame.mixer.Sound('assets\\audio\\sounds\\UI\\2. Clicks\\Click_6.wav')
         }
         self.music = {
             'stray_cat': 'assets\\audio\\music\\Monolith OST 320\\33 Stray Cat (Alternate).mp3',

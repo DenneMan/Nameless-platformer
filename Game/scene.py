@@ -1,10 +1,22 @@
-import pygame, math, random
+import pygame, math, random, json
 from datetime import datetime
 import engine, helper, level
 import temporary, permanent, universal
 from world import World_Inside, World_Outside
 from gui import GUI
 from config import *
+
+left, right, jump, dash = None, None, None, None
+def import_keys():
+    global left, right, jump, dash
+    with open('settings.json', 'r') as f:
+        data = json.load(f)
+        left = data["keybinds"]['left']
+        right = data["keybinds"]['right']
+        jump = data["keybinds"]['jump']
+        dash = data["keybinds"]['dash']
+import_keys()
+
 
 class Scene():
     def __init__(self):
@@ -16,7 +28,8 @@ class Scene():
     def input(self, sm):
         self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP, self.ABILITY = False, False, False, False, False, False, False, False, False, False, False, False, False
         self.mouse_pos = pygame.mouse.get_pos()
-        for event in pygame.event.get():
+        self.events = pygame.event.get()
+        for event in self.events:
             if event.type == pygame.QUIT:
                 self.running, self.playing = False, False
                 self.current_menu.displaying = False
@@ -33,13 +46,13 @@ class Scene():
                     self.BACK = True
         # Keyboard
         active_keys = pygame.key.get_pressed()
-        if active_keys[pygame.K_SPACE]:
+        if active_keys[jump]:
             self.JUMP = True
-        if active_keys[pygame.K_a]:
+        if active_keys[left]:
             self.LEFT = True
-        if active_keys[pygame.K_d]:
+        if active_keys[right]:
             self.RIGHT = True
-        if active_keys[pygame.K_LSHIFT]:
+        if active_keys[dash]:
             self.DASH = True
         if active_keys[pygame.K_e]:
             self.ABILITY = True
@@ -52,7 +65,6 @@ class MainMenu(Scene):
     def onEnter(self):
         universal.sound_manager.playMusic('stray_cat')
     def __init__(self):
-
         current_hour = int(str(datetime.now().time())[:2])
         if current_hour >= 20 or current_hour <= 5:
             cycle = 'Night'
@@ -63,16 +75,20 @@ class MainMenu(Scene):
             [pygame.transform.scale(pygame.image.load(directory + cycle + '\\back.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
             [pygame.transform.scale(pygame.image.load(directory + cycle + '\\mid.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)],
             [pygame.transform.scale(pygame.image.load(directory + cycle + '\\front.png').convert_alpha(), (SCREEN_W, SCREEN_H)), pygame.math.Vector2(0, 0)]]
-        self.start_button = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", 80), "Play", (255, 255, 255), (SCREEN_W/2, SCREEN_H/2), "center"), (100, 100, 100), (200, 200, 200))
+        self.start_button = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", 80), "Play", (255, 255, 255), (SCREEN_W/2, SCREEN_H/2), "center"), (100, 100, 100), (150, 150, 150))
+        self.settings_button = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", 80), "Settings", (255, 255, 255), (SCREEN_W/2, SCREEN_H/2 + 80), "center"), (100, 100, 100), (150, 150, 150))
     def input(self, sm):
         super().input(sm)
         if self.BACK:
             sm.pop()
             sm.push(Fade(self, None, 0.5))
-        if self.start_button.collide(pygame.mouse.get_pos()):
-            if self.M1:
+        if self.M1:
+            if self.start_button.collide(self.mouse_pos):
                 sm.push(Fade(self, Game(), 0.5))
-        self.start_button.highlight(pygame.mouse.get_pos())
+            if self.settings_button.collide(self.mouse_pos):
+                sm.push(Fade(self, Settings(), 0.5))
+        self.start_button.highlight(self.mouse_pos)
+        self.settings_button.highlight(self.mouse_pos)
     def update(self, sm, dt):
         for i, image in enumerate(self.background):
             image[1].x -= dt * i * 20 + dt * 10
@@ -83,6 +99,80 @@ class MainMenu(Scene):
             surface.blit(image[0], (image[1].x, 0))
             surface.blit(image[0], (image[1].x + SCREEN_W, 0))
         self.start_button.draw(surface)
+        self.settings_button.draw(surface)
+
+class Settings(Scene):
+    def __init__(self):
+        self.images = engine.load_spritesheet('assets\\sprites\\Settings.png', 240, 135)
+        temp = []
+        for image in self.images:
+            temp.append(pygame.transform.scale(image, (SCREEN_W, SCREEN_H)))
+        self.images = temp
+        self.state = 'controls'
+        pixel = (SCREEN_W/240)
+        self.back_button = pygame.Rect(2 * pixel, 2 * pixel, 14 * pixel, 10 * pixel)
+        self.c_button = pygame.Rect(18 * pixel, 2 * pixel, 53 * pixel, 10 * pixel)
+        self.gr_button = pygame.Rect(73 * pixel, 2 * pixel, 53 * pixel, 10 * pixel)
+        self.a_button = pygame.Rect(128 * pixel, 2 * pixel, 53 * pixel, 10 * pixel)
+        self.ga_button = pygame.Rect(183 * pixel, 2 * pixel, 54 * pixel, 10 * pixel)
+
+        self.current_edit = None
+        self.jump_button = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", 80), "Settings", (255, 255, 255), (SCREEN_W/2, SCREEN_H/2 + 80), "center"), (100, 100, 100), (150, 150, 150))
+    def input(self, sm):
+        super().input(sm)
+        if self.BACK:
+            sm.set(Fade(self, MainMenu(), 0.5))
+        if self.M1:
+            if self.back_button.collidepoint(self.mouse_pos):
+                sm.set(Fade(self, MainMenu(), 0.5))
+            if self.c_button.collidepoint(self.mouse_pos):
+                self.state = 'controls'
+            if self.gr_button.collidepoint(self.mouse_pos):
+                self.state = 'graphics'
+            if self.a_button.collidepoint(self.mouse_pos):
+                self.state = 'audio'
+            if self.ga_button.collidepoint(self.mouse_pos):
+                self.state = 'gameplay'
+            
+            if self.state == 'controls':
+                if self.jump_button.collide(self.mouse_pos):
+                    self.current_edit = 'jump'
+        self.jump_button.highlight(self.mouse_pos)
+
+# TODO - (map all buttons) 
+# HOWTO - self.jump_button, /\ collide with button and highlight then last \/ if self.current_edit = 'jump' to change key
+
+    def update(self, sm, dt):
+        if self.state == 'controls':
+            if self.current_edit == 'jump':
+                for event in self.events:
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == 27:
+                            self.current_edit = None
+                        else:
+                            settings = json.load(open('settings.json'))
+                            settings['keybinds']['jump'] = event.key
+                            json_settings = json.dumps(settings, indent=4)
+                            with open('settings.json', 'w') as f:
+                                f.write(json_settings)
+                            self.current_edit = None
+                            import_keys()
+        elif self.state == 'graphics':
+            ...
+        elif self.state == 'audio':
+            ...
+        elif self.state == 'gameplay':
+            ...
+    def draw(self, sm, surface):
+        if self.state == 'controls':
+            surface.blit(self.images[0], (0, 0))
+            self.jump_button.draw(surface)
+        elif self.state == 'graphics':
+            surface.blit(self.images[1], (0, 0))
+        elif self.state == 'audio':
+            surface.blit(self.images[2], (0, 0))
+        elif self.state == 'gameplay':
+            surface.blit(self.images[3], (0, 0))
 
 
 class Game(Scene):
@@ -139,6 +229,7 @@ class Game(Scene):
             elif self.state == 'upgrading':
                 for i in range(3):
                     if self.upgrade_rects[i].collidepoint(pygame.mouse.get_pos()):
+                        universal.sound_manager.playSound('click_' + str(random.randint(1,2)))
                         self.clicked_upgrade = i
         if self.BACK:
             self.playing = False
@@ -296,3 +387,6 @@ class SceneManager:
         self.scenes.pop()
         if not self.isEmpty():
             self.scenes[-1].onEnter()
+    def set(self, scene):
+        self.scenes = []
+        self.scenes.append(scene)
