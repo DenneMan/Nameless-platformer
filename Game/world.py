@@ -1,5 +1,5 @@
 import json
-import engine
+import engine, universal
 from config import *
 
 class World_Inside():
@@ -77,10 +77,20 @@ class World_Outside():
                 if current_x >= self.width:
                     current_x = 0
                     current_y += 1
+            entity_dict = {}
+            current_x = 0
+            current_y = 0
+            for entity in entities:
+                entity_dict[str((current_x, current_y))] = entity
+                current_x += 1
+                if current_x >= self.width:
+                    current_x = 0
+                    current_y += 1
         world = engine.Entity()
         world.name = 'world'
         world.children = tiles
         engine.entities.append(world)
+        universal.spawn_locations = entity_dict
 
     def make_tile(self, x, y, index):
         tile = engine.Entity()

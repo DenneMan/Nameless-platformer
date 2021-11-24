@@ -17,10 +17,12 @@ class System():
         pass
 
 class CameraSystem(System):
-    def __init__(self, fill_color, out_of_bounds):
+    def __init__(self, fill_color, out_of_bounds, out_of_bounds_left, out_of_bounds_right):
         super().__init__()
         self.fill_color = fill_color
         self.out_of_bounds = out_of_bounds
+        self.out_of_bounds_left = out_of_bounds_left
+        self.out_of_bounds_right = out_of_bounds_right
     def check(self, entity):
         return entity.camera is not None
     def _update(self, surface, entity):
@@ -37,8 +39,17 @@ class CameraSystem(System):
         self.offset = pygame.math.Vector2(entity.camera.pos.x + entity.camera.size.x/2 - (entity.camera.world_x / entity.camera.zoom), entity.camera.pos.y + entity.camera.size.y/2 - (entity.camera.world_y / entity.camera.zoom))
 
         if self.out_of_bounds != None:
-            if entity.camera.size.y - self.offset.y > self.out_of_bounds / entity.camera.zoom:
-                self.offset.y = entity.camera.size.y - self.out_of_bounds / entity.camera.zoom
+            if entity.camera.size.y - self.offset.y > self.out_of_bounds:
+                self.offset.y = entity.camera.size.y - self.out_of_bounds
+
+        if self.out_of_bounds_left != None:
+            if -self.offset.x < self.out_of_bounds_left:
+                self.offset.x = self.out_of_bounds_left
+
+        if self.out_of_bounds_right != None:
+            if entity.camera.size.x - self.offset.x > self.out_of_bounds_right:
+                self.offset.x = entity.camera.size.x - self.out_of_bounds_right
+
 
         # Draw entities
         for e in entities:

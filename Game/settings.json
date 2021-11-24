@@ -6,7 +6,8 @@
         "dash": 1073742049
     },
     "volumes": {
-        "sound": 0.4,
-        "music": 1.0
+        "master": 0.2,
+        "sound": 0.3,
+        "music": 0.25
     }
 }

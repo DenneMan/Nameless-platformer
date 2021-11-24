@@ -1,5 +1,6 @@
 import pygame
-import engine
+import engine, temporary
+from config import *
 
 class GUI():
     def __init__(self):
@@ -22,6 +23,7 @@ class GUI():
         self.enemy_healthbar = temp
 
         self.player_health_percent = 1
+        self.coins = engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", 50), '0', (218, 165, 32), (SCREEN_W - 20, 20), "topright")
     def update(self, dt):
         self.enemies = []
         for e in engine.entities:
@@ -36,8 +38,6 @@ class GUI():
         self.player_health_percent -= (self.player_health_percent - self.desired_health_percent) / 20
 
     def draw(self, surface, offset):
-
-
         #player health
         x = (self.player.collider.l + self.player.collider.w/2) + offset.x
         y = (self.player.collider.t) + offset.y
@@ -58,4 +58,12 @@ class GUI():
             pygame.draw.rect(surface, (193, 42, 68), pygame.Rect(x - 68, y - 40, 29 * 4 * health_percent, 12))
             pygame.draw.rect(surface, (151, 18, 41), pygame.Rect(x - 68, y - 40 + 8, 29 * 4 * health_percent, 4))
             surface.blit(self.enemy_healthbar[1], (x - 76, y - 44))
+
+        print(self.player.controller.sweep_timer)
+        height = 250 * (self.player.controller.sweep_timer / self.player.controller.sweep_delay)
+        pygame.draw.rect(surface, (90, 90, 90), pygame.Rect(SCREEN_W - 40, SCREEN_H - 260, 30, 250))
+        pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(SCREEN_W - 40, SCREEN_H - height - 10, 30, height))
+
+        self.coins.set_text(str(temporary.coins))
+        self.coins.draw(surface)
         #dash bar

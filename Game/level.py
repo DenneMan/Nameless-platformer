@@ -26,6 +26,7 @@ class TempLevel():
         self.exp = 0
         self.money = 0
         self.exp_to_level_up = 500 + self.level ** 2 * 25
+        self.upgrade_names = ['x','x','Better Eyesight','x','x','x','Midas Touch','Leg Day','x','x','Vampyrism','Strong Bloodcells','Acid Blood','Bleeding','x','Soul Collector','Soul Eater','Soul Blast','x','x','Sharpened Blade','Heavier Blade','Stronger Metal','x','x']
     def give_exp(self, amount):
         self.exp += amount
         if self.exp >= self.exp_to_level_up:

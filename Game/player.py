@@ -56,8 +56,12 @@ class Player():
         self.health = 1000
         self.base_max_health = 1000
         self.max_health = 1000
-        self.base_damage = 100
-        self.damage = 100
+        self.base_damage = 50
+        self.damage = 50
+
+        self.sweeping_edge = False
+        self.sweep_timer = 0.5
+        self.sweep_delay = 0.5
 
     def update(self, dt):
         self.acceleration = self.base_acceleration * temporary.legday_mult
@@ -74,6 +78,12 @@ class Player():
             if self.attack_timer <= 0:
                 self.is_attacking = False
                 self.attack_timer = self.attack_delay
+
+        if self.sweeping_edge == False:
+            self.sweep_timer += dt
+            if self.sweep_timer > self.sweep_delay:
+                self.sweep_timer = self.sweep_delay
+                self.sweeping_edge = True
 
         if self.transform.mirrored == True:
             is_flipped_last_frame = True
@@ -109,7 +119,7 @@ class Player():
             last_grounded = False
         self.collision()
         if last_grounded == False and self.is_grounded == True:
-            engine.entities.append(helper.instantiate('dust_landing', self.collider.l + self.collider.w / 2, self.collider.b, self.transform.mirrored))
+            engine.entities.append(helper.spawn_dustlanding(self.collider.l + self.collider.w / 2, self.collider.b, self.transform.mirrored))
 
         self.set_state()
 
@@ -248,16 +258,21 @@ class Player():
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
                     entity.controller.hit(self.damage * temporary.damage_mult)
+                    if self.sweeping_edge == False:
+                        attack_rect.y = -100000
+
                     if (entity.collider.l + entity.collider.w/2) - (self.collider.l + self.collider.w/2) > 0:
-                        x_dir = 100
+                        x_dir = 50
                     else:
-                        x_dir = -100
+                        x_dir = -50
                     entity.controller.vel.x = x_dir * temporary.knockback_mult 
                     entity.controller.vel.y -= 300
             elif entity.name == 'dummy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
                     entity.controller.hit()
+        self.sweeping_edge = False
+        self.sweep_timer = 0
 
     def hit(self, damage):
         self.health -= damage

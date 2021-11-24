@@ -37,8 +37,8 @@ class Enemy():
         self.state_timer = 0
         self.time_until_next_state = 3
 
-        self.attack_delay = 0.8
-        self.attack_timer = 0.8
+        self.attack_delay = 0.5
+        self.attack_timer = 0.5
 
         self.is_currently_attacking = False
         self.time_since_attack = 0
@@ -47,10 +47,10 @@ class Enemy():
         self.target = engine.find_entity('player')
         self.world = engine.find_entity('world')
 
-        self.health = 300
-        self.max_health = 300
+        self.health = 300 * temporary.enemy_health_mult
+        self.max_health = 300 * temporary.enemy_health_mult
 
-        self.damage = 100
+        self.damage = 300 * temporary.enemy_health_mult
 
         self.has_activated = False
         
@@ -144,12 +144,12 @@ class Enemy():
             if self.state_timer > self.time_until_next_state:
                 self.time_until_next_state = random.randrange(2, 6)
                 if self.direction == 'stop':
-                    self.direction = random.randint(1, 2)
+                    self.direction = random.choice(['left', 'right'])
                 if self.direction == 'right':
-                    self.direction = random.randint(0, 1)
+                    self.direction = random.choice(['left', 'stop'])
                 if self.direction == 'left':
-                    self.direction = (random.randint(0, 1) - 1)
-                    self.state_timer = 0
+                    self.direction = random.choice(['stop', 'right'])
+                self.state_timer = 0
 
             if self.collide_right:
                 self.direction = 'left'

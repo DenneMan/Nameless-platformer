@@ -1,8 +1,5 @@
-# Python imports
 import pygame, os
-# Personal imports
-import engine, scene, soundmanager, level
-import universal, temporary, permanent
+import engine, scene, soundmanager, level, universal
 from config import *
 
 pygame.init()

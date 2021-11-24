@@ -11,6 +11,7 @@ soul_blast = False
 damage_mult = 1
 knockback_mult = 1
 resistance_mult = 1
+enemy_health_mult = 1
 
 def reset_multipliers():
     global better_eyesight, gold_mult, legday_mult, lifesteal_mult, max_health_mult, acid_blood_mult, bleeding, soul_collector, soul_eater, soul_blast, damage_mult, knockback_mult, resistance_mult
@@ -27,3 +28,6 @@ def reset_multipliers():
     damage_mult = 1
     knockback_mult = 1
     resistance_mult = 1
+
+
+coins = 0
