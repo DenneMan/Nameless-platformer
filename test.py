@@ -1,3 +1,10 @@
 import pygame
 
-print(pygame.K_a, pygame.K_d, pygame.K_SPACE, pygame.K_LSHIFT)
+display = pygame.display.set_mode((10, 10))
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+        if event.type == pygame.KEYDOWN:
+            print(pygame.key.name(event.key))

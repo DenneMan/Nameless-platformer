@@ -109,15 +109,34 @@ class Settings(Scene):
             temp.append(pygame.transform.scale(image, (SCREEN_W, SCREEN_H)))
         self.images = temp
         self.state = 'controls'
-        pixel = (SCREEN_W/240)
-        self.back_button = pygame.Rect(2 * pixel, 2 * pixel, 14 * pixel, 10 * pixel)
-        self.c_button = pygame.Rect(18 * pixel, 2 * pixel, 53 * pixel, 10 * pixel)
-        self.gr_button = pygame.Rect(73 * pixel, 2 * pixel, 53 * pixel, 10 * pixel)
-        self.a_button = pygame.Rect(128 * pixel, 2 * pixel, 53 * pixel, 10 * pixel)
-        self.ga_button = pygame.Rect(183 * pixel, 2 * pixel, 54 * pixel, 10 * pixel)
+        self.ps = int(SCREEN_W/240)
+        self.back_button = pygame.Rect(2 * self.ps, 2 * self.ps, 14 * self.ps, 10 * self.ps)
+        self.c_button = pygame.Rect(18 *self.ps, 2 *self.ps, 53 *self.ps, 10 * self.ps)
+        self.gr_button = pygame.Rect(73 *self.ps, 2 *self.ps, 53 *self.ps, 10 * self.ps)
+        self.a_button = pygame.Rect(128 *self.ps, 2 *self.ps, 53 *self.ps, 10 * self.ps)
+        self.ga_button = pygame.Rect(183 *self.ps, 2 *self.ps, 54 *self.ps, 10 * self.ps)
 
         self.current_edit = None
-        self.jump_button = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", 80), "Settings", (255, 255, 255), (SCREEN_W/2, SCREEN_H/2 + 80), "center"), (100, 100, 100), (150, 150, 150))
+        font_size = 8 * self.ps
+        self.button_names = ['left', 'right', 'jump', 'dash']
+        self.buttons = {}
+        self.keys = {}
+        for i, name in enumerate(self.button_names):
+            self.buttons[name] = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", font_size), str.title(name), (255, 255, 255), (20*self.ps, (i + 5) * font_size), "topleft"), (100, 100, 100), (150, 150, 150))
+            self.keys[name] = engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", font_size), str(eval(name)), (255, 255, 255), (40*self.ps, (i + 5) * font_size), "topleft")
+
+        self.highlight_image = pygame.image.load('assets\\sprites\\highlight.png').convert_alpha()
+        self.highlight_image = pygame.transform.scale(self.highlight_image, (self.ps,self.ps))
+        self.highlight_rects = [
+            self.highlight_image.get_rect(),
+            self.highlight_image.get_rect(),
+            self.highlight_image.get_rect(),
+            self.highlight_image.get_rect()
+            ]
+    
+        self.volume_button = engine.Button(engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", font_size), 'Volume', (255, 255, 255), (20*self.ps, 5 * font_size), "topleft"), (100, 100, 100), (150, 150, 150))
+        self.volume_text = engine.Text(pygame.font.Font("assets\\fonts\\EquipmentPro.ttf", font_size), str(int(universal.sound_manager.musicVolume * 100)), (255, 255, 255), (45*self.ps, 5 * font_size), "topleft")
+        self.volume_buffer = ''
     def input(self, sm):
         super().input(sm)
         if self.BACK:
@@ -125,52 +144,105 @@ class Settings(Scene):
         if self.M1:
             if self.back_button.collidepoint(self.mouse_pos):
                 sm.set(Fade(self, MainMenu(), 0.5))
-            if self.c_button.collidepoint(self.mouse_pos):
+            elif self.c_button.collidepoint(self.mouse_pos):
                 self.state = 'controls'
-            if self.gr_button.collidepoint(self.mouse_pos):
+            elif self.gr_button.collidepoint(self.mouse_pos):
                 self.state = 'graphics'
-            if self.a_button.collidepoint(self.mouse_pos):
+            elif self.a_button.collidepoint(self.mouse_pos):
                 self.state = 'audio'
-            if self.ga_button.collidepoint(self.mouse_pos):
+            elif self.ga_button.collidepoint(self.mouse_pos):
                 self.state = 'gameplay'
             
             if self.state == 'controls':
-                if self.jump_button.collide(self.mouse_pos):
-                    self.current_edit = 'jump'
-        self.jump_button.highlight(self.mouse_pos)
+                for name in self.button_names:
+                    if self.buttons[name].collide(self.mouse_pos):
+                        self.current_edit = name
+            elif self.state == 'audio':
+                if self.volume_button.collide(self.mouse_pos):
+                    self.current_edit = 'volume'
 
-# TODO - (map all buttons) 
-# HOWTO - self.jump_button, /\ collide with button and highlight then last \/ if self.current_edit = 'jump' to change key
+        for name in self.button_names:
+            self.buttons[name].highlight(self.mouse_pos)
+        self.volume_button.highlight(self.mouse_pos)
+
+    def change_key(self, key):
+        for event in self.events:
+            if event.type == pygame.KEYDOWN:
+                if event.key != 27:
+                    settings = json.load(open('settings.json'))
+                    settings['keybinds'][key] = event.key
+                    json_settings = json.dumps(settings, indent=4)
+                    with open('settings.json', 'w') as f:
+                        f.write(json_settings)
+                    import_keys()
+                self.current_edit = None
 
     def update(self, sm, dt):
         if self.state == 'controls':
-            if self.current_edit == 'jump':
-                for event in self.events:
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == 27:
-                            self.current_edit = None
-                        else:
-                            settings = json.load(open('settings.json'))
-                            settings['keybinds']['jump'] = event.key
-                            json_settings = json.dumps(settings, indent=4)
-                            with open('settings.json', 'w') as f:
-                                f.write(json_settings)
-                            self.current_edit = None
-                            import_keys()
+            for name in self.button_names:
+                if self.current_edit == None:
+                    for rect in self.highlight_rects:
+                        rect.topleft = (-100, -100)
+                elif self.current_edit == name:
+                    self.change_key(name)
+                    self.highlight_rects[0].topleft = (self.keys[name].rect.left - self.ps * 1.5, self.keys[name].rect.top)
+                    self.highlight_rects[1].topright = (self.keys[name].rect.right + self.ps * 1.5, self.keys[name].rect.top)
+                    self.highlight_rects[2].bottomright = (self.keys[name].rect.right + self.ps * 1.5, self.keys[name].rect.bottom)
+                    self.highlight_rects[3].bottomleft = (self.keys[name].rect.left - self.ps * 1.5, self.keys[name].rect.bottom)
+                self.keys[name].set_text(str.capitalize(pygame.key.name(eval(name))))
         elif self.state == 'graphics':
             ...
         elif self.state == 'audio':
-            ...
+            confirm = False
+            if self.current_edit == None:
+                for rect in self.highlight_rects:
+                    rect.topleft = (-100, -100)
+            elif self.current_edit == 'volume':
+                for event in self.events:
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_RETURN:
+                            confirm = True
+                        if str.isdecimal(pygame.key.name(event.key)):
+                            print(pygame.key.name(event.key))
+                            self.volume_buffer += pygame.key.name(event.key)
+                            self.volume_text.set_text(str(self.volume_buffer))
+                self.highlight_rects[0].topleft = (self.volume_text.rect.left - self.ps * 1.5, self.volume_text.rect.top)
+                self.highlight_rects[1].topright = (self.volume_text.rect.right + self.ps * 1.5, self.volume_text.rect.top)
+                self.highlight_rects[2].bottomright = (self.volume_text.rect.right + self.ps * 1.5, self.volume_text.rect.bottom)
+                self.highlight_rects[3].bottomleft = (self.volume_text.rect.left - self.ps * 1.5, self.volume_text.rect.bottom)
+            if confirm:
+                volume = int(self.volume_buffer)
+                if volume < 100:
+                    universal.sound_manager.musicVolume = volume / 100
+                    self.volume_text.set_text(str(int(universal.sound_manager.musicVolume * 100)))
+                else:
+                    universal.sound_manager.musicVolume = 1
+                    self.volume_text.set_text(str(int(universal.sound_manager.musicVolume * 100)))
+                self.volume_buffer = ''
+                settings = json.load(open('settings.json'))
+                settings['volumes']['music'] = volume / 100
+                json_settings = json.dumps(settings, indent=4)
+                with open('settings.json', 'w') as f:
+                    f.write(json_settings)
+                self.current_edit = None
         elif self.state == 'gameplay':
             ...
     def draw(self, sm, surface):
         if self.state == 'controls':
             surface.blit(self.images[0], (0, 0))
-            self.jump_button.draw(surface)
+            for name in self.button_names:
+                self.buttons[name].draw(surface)
+                self.keys[name].draw(surface)
+            for i, rect in enumerate(self.highlight_rects):
+                surface.blit(pygame.transform.rotate(self.highlight_image, i*(-90)), rect)
         elif self.state == 'graphics':
             surface.blit(self.images[1], (0, 0))
         elif self.state == 'audio':
             surface.blit(self.images[2], (0, 0))
+            self.volume_button.draw(surface)
+            self.volume_text.draw(surface)
+            for i, rect in enumerate(self.highlight_rects):
+                surface.blit(pygame.transform.rotate(self.highlight_image, i*(-90)), rect)
         elif self.state == 'gameplay':
             surface.blit(self.images[3], (0, 0))
 

@@ -7,7 +7,7 @@ from config import *
 
 pygame.init()
 
-os.environ['SDL_VIDEO_WINDOW_POS'] = f"{0},{-100}"
+os.environ['SDL_VIDEO_WINDOW_POS'] = f"{0},{0}"
 display = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 
 universal.sound_manager = soundmanager.SoundManager()

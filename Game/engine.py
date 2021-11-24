@@ -212,6 +212,7 @@ def deltaTime():
 class Button():
     def __init__(self, text, defualt_color, highlight_color):
         self.text = text
+        self.text.set_color(defualt_color)
         self.rect = self.text.rect
         self.default_color = defualt_color
         self.highlight_color = highlight_color

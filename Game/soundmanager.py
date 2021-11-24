@@ -1,10 +1,12 @@
-import pygame
+import pygame, json
 
 class SoundManager():
     def __init__(self):
         pygame.mixer.init()
-        self.soundVolume = 0.4
-        self.musicVolume = 0.2
+        with open('settings.json', 'r') as f:
+            data = json.load(f)
+            self.soundVolume = data['volumes']['sound']
+            self.musicVolume = data['volumes']['music']
         self.sounds = {
             'coin_pickup_1': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\5. Collectibles\\Collectibles_1.wav'),
             'coin_pickup_2': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\5. Collectibles\\Collectibles_2.wav'),
