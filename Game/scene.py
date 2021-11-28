@@ -304,8 +304,6 @@ class Settings(Scene):
 class Game(Scene):
     def onEnter(self):
         universal.sound_manager.playMusic('rivaling_force')
-    def onExit(self):
-        ...
     def __init__(self):
         temporary.enemy_health_mult *= 1.2
 
@@ -326,7 +324,6 @@ class Game(Scene):
         #World_Inside(self.wall_tileset, self.bg_tileset, 'assets\\tilesets\\walls\\Map.json')
 
         i = str(random.randint(1, 3))
-        print(i)
         self.tileset = engine.load_spritesheet('assets\\sprites\\tilesets\\Outside.png', 32, 32)
         World_Outside(self.tileset, 'assets\\tilesets\\walls\\Outside_' + i + '.json')
 
@@ -396,12 +393,12 @@ class Game(Scene):
         if self.DASH:
             self.player.controller.is_dashing = True
         if self.player.controller.health <= 0 or self.player.collider.t > self.out_of_bounds:
-            if self.death_opacity == 0 and IF_YOU_ARE_FORTNITE_GAMER_MAKE_THIS_TRUE:
+            if self.death_opacity == 0:
                 old_sound_volume = universal.sound_manager.sound_volume
                 old_master_volume = universal.sound_manager.master_volume
                 universal.sound_manager.sound_volume = 1
                 universal.sound_manager.master_volume = 1
-                universal.sound_manager.playSound('deathsound_2')
+                universal.sound_manager.playSound('deathsound')
                 universal.sound_manager.sound_volume = old_sound_volume
                 universal.sound_manager.master_volume = old_master_volume
             self.state = 'death_screen'
@@ -470,6 +467,8 @@ class Game(Scene):
                     temporary.knockback_mult += 0.2
                 if self.upgrade_choices[self.clicked_upgrade] == 22:
                     temporary.resistance_mult += 0.2
+                
+                self.clicked_upgrade = None
 
                 
             self.text1.set_text(str(self.level_manager.upgrade_names[self.upgrade_choices[0]]))
@@ -499,7 +498,6 @@ class Game(Scene):
             fill.set_alpha(self.death_opacity)
             surface.blit(fill, (0, 0))
             
-
 class Transition(Scene):
     def __init__(self, fromScene, toScene, length):
         self.percentage = 0

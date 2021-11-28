@@ -18,8 +18,7 @@ class SoundManager():
             'slash_2': pygame.mixer.Sound('assets\\audio\\sounds\\Gameplay\\4. Impact\\Metal_woosh_2.wav'),
             'click_1': pygame.mixer.Sound('assets\\audio\\sounds\\UI\\2. Clicks\\Click_5.wav'),
             'click_2': pygame.mixer.Sound('assets\\audio\\sounds\\UI\\2. Clicks\\Click_6.wav'),
-            'deathsound': pygame.mixer.Sound('assets\\audio\\sounds\\deathsound.mp3'),
-            'deathsound_2': pygame.mixer.Sound('assets\\audio\\sounds\\deathsound_2.mp3')
+            'deathsound': pygame.mixer.Sound('assets\\audio\\sounds\\8bit SFX\\02_Death_v1.wav'),
         }
         self.music = {
             'stray_cat': 'assets\\audio\\music\\Monolith OST 320\\33 Stray Cat (Alternate).mp3',

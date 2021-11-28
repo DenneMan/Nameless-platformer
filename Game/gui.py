@@ -59,7 +59,6 @@ class GUI():
             pygame.draw.rect(surface, (151, 18, 41), pygame.Rect(x - 68, y - 40 + 8, 29 * 4 * health_percent, 4))
             surface.blit(self.enemy_healthbar[1], (x - 76, y - 44))
 
-        print(self.player.controller.sweep_timer)
         height = 250 * (self.player.controller.sweep_timer / self.player.controller.sweep_delay)
         pygame.draw.rect(surface, (90, 90, 90), pygame.Rect(SCREEN_W - 40, SCREEN_H - 260, 30, 250))
         pygame.draw.rect(surface, (255, 255, 255), pygame.Rect(SCREEN_W - 40, SCREEN_H - height - 10, 30, height))

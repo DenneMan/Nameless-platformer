@@ -47,3 +47,4 @@ class TempLevel():
                 pu3 = random.randint(0, 24)
             
             universal.scene_manager.scenes[-1].upgrade_choices = [pu1, pu2, pu3]
+        print(self.level)
