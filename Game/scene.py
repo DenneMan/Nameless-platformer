@@ -23,7 +23,7 @@ class Scene():
     def onExit(self):
         pass
     def input(self, sm):
-        self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP, self.ABILITY = False, False, False, False, False, False, False, False, False, False, False, False, False
+        self.JUMP, self.DASH, self.UP, self.DOWN, self.LEFT, self.RIGHT, self.BACK, self.M1, self.M2, self.M3, self.SCR_DOWN, self.SCR_UP, self.ABILITY, self.ATTACK = False, False, False, False, False, False, False, False, False, False, False, False, False, False
         self.mouse_pos = pygame.mouse.get_pos()
         self.events = pygame.event.get()
         for event in self.events:
@@ -41,6 +41,8 @@ class Scene():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.BACK = True
+                if event.key == pygame.K_x:
+                    self.ATTACK = True
         # Keyboard
         active_keys = pygame.key.get_pressed()
         if active_keys[jump]:
@@ -374,13 +376,15 @@ class Game(Scene):
             sm.pop()
             sm.push(Fade(self, None, 0.5))
         if self.M1:
-            if self.state == 'gaming':
+            if self.state == 'gaming' and USE_MOUSE_ATTACK:
                 self.player.controller.attack()
             elif self.state == 'upgrading':
                 for i in range(3):
                     if self.upgrade_rects[i].collidepoint(pygame.mouse.get_pos()):
                         universal.sound_manager.playSound('click_' + str(random.randint(1,2)))
                         self.clicked_upgrade = i
+        if self.ATTACK and not USE_MOUSE_ATTACK:
+            self.player.controller.attack()
         if self.BACK:
             self.playing = False
         if self.JUMP:

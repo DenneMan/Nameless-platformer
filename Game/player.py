@@ -56,8 +56,8 @@ class Player():
         self.health = 1000
         self.base_max_health = 1000
         self.max_health = 1000
-        self.base_damage = 50
-        self.damage = 50
+        self.base_damage = 100
+        self.damage = 100
 
         self.sweeping_edge = False
         self.sweep_timer = 0.5
@@ -67,6 +67,7 @@ class Player():
         self.acceleration = self.base_acceleration * temporary.legday_mult
         self.max_speed = self.base_max_speed * temporary.legday_mult
         self.jump_force = self.base_jump_force * temporary.legday_mult
+        self.damage = self.base_damage * temporary.damage_mult
 
         self.max_health = self.base_max_health * temporary.max_health_mult
         
@@ -257,7 +258,7 @@ class Player():
             if entity.name == 'enemy':
                 c = pygame.Rect(entity.collider.l, entity.collider.t, entity.collider.w, entity.collider.h)
                 if attack_rect.colliderect(c):
-                    entity.controller.hit(self.damage * temporary.damage_mult)
+                    entity.controller.hit(self.damage)
                     if self.sweeping_edge == False:
                         attack_rect.y = -100000
 
